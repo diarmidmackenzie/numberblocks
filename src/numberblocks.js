@@ -207,38 +207,13 @@ AFRAME.registerComponent('numberblock', {
         this.addKeyFrames(animData, "wave")
         break;
 
-     case "look":
+     case "stop":
        animData = {
          'easing': "easeInOutQuad",
          'repeat' : false,
          'replace' : true
        }
        this.addKeyFrames(animData, "stop")
-       var animData = {
-         'msecs': 500,
-         'easing': "easeInOutQuad",
-         'repeat' : false,
-         'replace' : false,
-         'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI + 20} 0`
-       }
-       this.whole.emit("addKeyFrame", animData, false);
-       animData = {
-         'msecs': 500,
-         'easing': "easeInOutQuad",
-         'repeat' : false,
-         'replace' : false,
-         'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI - 20} 0`
-       }
-       this.whole.emit("addKeyFrame", animData, false);
-
-       animData = {
-         'msecs': 500,
-         'easing': "easeInOutQuad",
-         'repeat' : false,
-         'replace' : false,
-         'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI} 0`
-       }
-       this.whole.emit("addKeyFrame", animData, false);
        break;
 
      default:
@@ -252,6 +227,22 @@ AFRAME.registerComponent('numberblock', {
 
     // Turn to rotation...  we want to take the shorter
     // (less than PI radians) direction of rotation.
+    this.turnTo(position);
+
+    var animData = {
+      'msecs': (position.length() * 10000),
+      'easing': "easeInOutQuad",
+      'repeat' : false,
+      'replace' : false,
+      'position': `${this.el.object3D.position.x + position.x}
+                   ${this.el.object3D.position.y}
+                   ${this.el.object3D.position.z + position.z}`
+    }
+
+    this.whole.emit("addKeyFrame", animData, false);
+  },
+
+  turnTo: function(position) {
     this.cylindrical.setFromVector3(position);
     var targetAngle = this.cylindrical.theta
     if (targetAngle - this.whole.object3D.rotation.y > Math.PI) {
@@ -267,17 +258,33 @@ AFRAME.registerComponent('numberblock', {
     }
 
     this.whole.emit("addKeyFrame", animData, false);
+  },
 
-    animData = {
-      'msecs': (position.length() * 10000),
+  lookLandR: function() {
+    var animData = {
+      'msecs': 500,
       'easing': "easeInOutQuad",
       'repeat' : false,
       'replace' : false,
-      'position': `${this.el.object3D.position.x + position.x}
-                   ${this.el.object3D.position.y}
-                   ${this.el.object3D.position.z + position.z}`
+      'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI + 20} 0`
     }
+    this.whole.emit("addKeyFrame", animData, false);
+    animData = {
+      'msecs': 500,
+      'easing': "easeInOutQuad",
+      'repeat' : false,
+      'replace' : false,
+      'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI - 20} 0`
+    }
+    this.whole.emit("addKeyFrame", animData, false);
 
+    animData = {
+      'msecs': 500,
+      'easing': "easeInOutQuad",
+      'repeat' : false,
+      'replace' : false,
+      'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI} 0`
+    }
     this.whole.emit("addKeyFrame", animData, false);
   },
 
@@ -300,22 +307,31 @@ AFRAME.registerComponent('numberblock', {
   tick: function () {
     // only ticks every 5 seconds.
 
-    var choice = Math.floor(Math.random() * 3);
+    var choice = Math.floor(Math.random() * 4);
 
     switch (choice) {
-      case 0:
+      case 0: // walk.
         var x = Math.random() - 0.5;
         var z = Math.random() - 0.5;
         this.targetPosition.set(x, 0, z);
         this.walkTo(this.targetPosition);
         break;
 
-      case 1:
-        this.setLimbsAnimation("look");
+      case 1: // look
+        this.setLimbsAnimation("stop");
+        this.lookLandR();
+
         break;
 
-      case 2:
+      case 2: // wave
         this.setLimbsAnimation("wave");
+        break;
+
+      case 3: // turn
+        var x = Math.random() - 0.5;
+        var z = Math.random() - 0.5;
+        this.targetPosition.set(x, 0, z);
+        this.turnTo(this.targetPosition);
         break;
     }
   }
@@ -327,6 +343,7 @@ AFRAME.registerComponent('keyframe-animation', {
 
   init: function() {
 
+    this.time = 0;
     this.keyFrames = [];
     this.listeners = {
       addKeyFrame: this.addKeyFrame.bind(this),
@@ -384,6 +401,7 @@ AFRAME.registerComponent('keyframe-animation', {
                                        ${this.el.object3D.position.z}`,
                                       keyFrame);
       this.animCount++;
+      this.animEndTime = Math.max(this.animEndTime, this.time + keyFrame.msecs);
     }
     if (keyFrame.rotation != null) {
       this.animateToKeyFrameComponent("rotation",
@@ -392,6 +410,7 @@ AFRAME.registerComponent('keyframe-animation', {
                                        ${this.el.object3D.rotation.z * 180 / Math.PI}`,
                                        keyFrame);
       this.animCount++;
+      this.animEndTime = Math.max(this.animEndTime, this.time + keyFrame.msecs);
     }
     if (keyFrame.scale != null) {
       this.animateToKeyFrameComponent("scale",
@@ -400,6 +419,7 @@ AFRAME.registerComponent('keyframe-animation', {
                                        ${this.el.object3D.scale.z}`,
                                         keyFrame);
       this.animCount++;
+      this.animEndTime = Math.max(this.animEndTime, this.time + keyFrame.msecs);
     }
 
     // If the keyFrame is to be repeated, add it to the end of the list.
@@ -440,9 +460,19 @@ AFRAME.registerComponent('keyframe-animation', {
 
   tick: function(time, timeDelta) {
 
+    this.time = time;
+
     if (this.animCount == 0) {
       // animation requested, but none playing.  Start the first.
       this.animateToFirstKeyFrame();
+    }
+    else
+    {
+      if (this.animEndTime > time + 1000) {
+        // Failed to receive timely animation end event.
+        console.warning("Animation End Event Lost!")
+        this.animCount = 0;
+      }
     }
   }
 });
