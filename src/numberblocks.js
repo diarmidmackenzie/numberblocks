@@ -344,6 +344,7 @@ AFRAME.registerComponent('keyframe-animation', {
   init: function() {
 
     this.time = 0;
+    this.animEndTime = 0;
     this.keyFrames = [];
     this.listeners = {
       addKeyFrame: this.addKeyFrame.bind(this),
@@ -470,7 +471,7 @@ AFRAME.registerComponent('keyframe-animation', {
     {
       if (this.animEndTime > time + 1000) {
         // Failed to receive timely animation end event.
-        console.warning("Animation End Event Lost!")
+        console.warn("Animation End Event Lost!")
         this.animCount = 0;
       }
     }
