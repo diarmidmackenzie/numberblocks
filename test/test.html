@@ -22,10 +22,9 @@
 
         animateRotation: function() {
           const randDelta = Math.random();
-          // workaround solution: add randDelta onto "dur" value, and all works fine...
 
           var attribName = "animation";
-          angle = Math.floor(Math.random() * 10);
+          angle = Math.floor(Math.random() * 5) + 5;
           var attribValue = {"property": "rotation",
                              "from": "0 0 0",
                              "to": `0 0 ${angle}`,
@@ -47,7 +46,7 @@
                  2nd animation does not begin, and does not trigger an Animation Complete event.">
   </a-text>
   <a-text position="0 4 -5" color="black" width="5"
-          value="The box is being rotated by a random number of degrees 3-6.
+          value="The box is being rotated by a random number of degrees 5-9.
                  Each time a rotation completes (rotationcomplete event), we trigger another rotation
                  This works OK until the same rotation is requested twice in a row
                  At which point no rotation is performed, no RotationComplete event is generated
