@@ -530,11 +530,18 @@ AFRAME.registerComponent('keyframe-animation', {
     //console.log(attribName);
     //console.log(attribString);
 
-    // Remove attribute before setting it, as recommended workaround for
+    // Remove animation attribute before setting it, as recommended workaround for
     // https://github.com/aframevr/aframe/issues/4810 where identical
     // animations can't be requested consecutively.
+    // for the moving-dynamic-body component (which takes care of physics sync)
+    // we need to ensure this is immediately next in the components call order
+    // so we add this atthe same time.
+    // (note this component does nothing for entities that have no physics
+    // dynamic-body component).
     this.el.removeAttribute(attribName);
+    this.el.removeAttribute("moving-dynamic-body");
     this.el.setAttribute(attribName, attribString);
+    this.el.setAttribute("moving-dynamic-body", "");
 
   },
 
@@ -614,3 +621,14 @@ keyframe-animation component...
 
 
 */
+
+
+AFRAME.registerComponent('moving-dynamic-body', {
+
+  tick: function() {
+    if (this.el.components["dynamic-body"]) {
+      this.el.components["dynamic-body"].syncToPhysics()
+    }
+  }
+
+});
