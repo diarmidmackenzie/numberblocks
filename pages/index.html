@@ -60,14 +60,16 @@
 </a-box>
 
 <a-entity id = "oneEntity" keyframe-animation position = "0 1.01 -1" numberblock >
-  <a-box id = "oneBody" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" keyframe-animation>
+  <a-entity id = "oneBody" keyframe-animation>
+  <a-box id = "oneBox" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" keyframe-animation>
+
+    <a-entity gltf-model="#face1"
+              keyframe-animation
+              scale="0.05 0.05 0.05"
+              position="0 0 0.05">
+    </a-entity>
   </a-box>
 
-  <a-entity gltf-model="#face1"
-            keyframe-animation
-            scale="0.05 0.05 0.05"
-            position="0 0 0.05">
-  </a-entity>
   <a-entity id = "oneLArm" gltf-model="#limb1"
             scale="0.05 0.05 0.05"
             keyframe-animation
@@ -92,6 +94,8 @@
             position="-0.02 -0.04 0"
             rotation="0 0 0">
   </a-entity>
+
+</a-entity>
 
 </a-entity>
 

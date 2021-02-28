@@ -113,6 +113,8 @@ AFRAME.registerComponent('phase-shift', {
   }
 });
 
+const ACTIONS = ["walk", "look", "wave", "turn", "floss", "stop"];
+
 const ANIMATIONS = {
 /*  'walk' : {
     'lLeg' : "property: rotation; from:20 0 0; to: -20 0 0; loop: true;  dir: alternate; easing:easeInOutQuad; dur: 500",
@@ -124,42 +126,66 @@ const ANIMATIONS = {
     'lLeg' : [[500, "-20 0 0"], [500, " 20 0 0"]],
     'rLeg' : [[500, " 20 0 0"], [500, "-20 0 0"]],
     'lArm' : [[500, " 30 0 30"], [500, "-30 0 30"]],
-    'rArm' : [[500, " -30 0 -30"], [500, "30 0 -30"]]
+    'rArm' : [[500, " -30 0 -30"], [500, "30 0 -30"]],
+    'body' : [[500, " 0 0 0"]],
+    'box' : [[500, " 0 0 0"]]
   },
 
   'panic' : {
     'lLeg' : [[80, "0 0 -10"], [80, " 0 0 5"]],
     'rLeg' : [[80, " 0 0 5"], [80, "0 0 -10"]],
     'lArm' : [[80, " 0 0 50"], [80, "0 0 10"]],
-    'rArm' : [[80, " 0 0 -10"], [80, "0 0 -50"]]
+    'rArm' : [[80, " 0 0 -10"], [80, "0 0 -50"]],
+    'body' : [[500, " 0 0 0"]],
+    'box' : [[500, " 0 0 0"]]
   },
 
   'wave' : {
     'lLeg' : [[500, "0 0 0"], [2000, " 0 0 0"]],
     'rLeg' : [[500, " 0 0 0"], [2000, "0 0 0"]],
     'lArm' : [[500, " 0 0 30"], [2000, "0 0 30"]],
-    'rArm' : [[500, " 0 0 -30"], [500, "0 0 -150"], [500, "0 0 -120"], [500, "0 0 -150"], [500, "0 0 -30"]]
+    'rArm' : [[500, " 0 0 -30"], [500, "0 0 -150"], [500, "0 0 -120"], [500, "0 0 -150"], [500, "0 0 -30"]],
+    'body' : [[500, " 0 0 0"]],
+    'box'  : [[500, " -20 0 0"], [1000, "-20 0 0"], [1000, "-20 0 0"], [500, "0 0 0"]]
+
   },
 
   'stop' : {
     'lLeg' : [[500, "0 0 0"]],
     'rLeg' : [[500, " 0 0 0"]],
     'lArm' : [[500, " 0 0 30"]],
-    'rArm' : [[500, " 0 0 -30"]]
+    'rArm' : [[500, " 0 0 -30"]],
+    'body' : [[500, " 0 0 0"]],
+    'box'  : [[500, " 0 0 0"]]
+  },
+
+  'floss' : {
+    'lLeg' : [[315, "0 0 -10"], [315, "0 0 10"],[315, "0 0 -10"], [315, "0 0 10"]],
+    'rLeg' : [[315, " 0 0 -10"], [315, "0 0 10"],[315, " 0 0 -10"], [315, "0 0 10"]],
+    'lArm' : [[315, " 30 0 5"], [315, " -30 0 80"], [315, " -30 0 5"], [315, " 30 0 80"]],
+    'rArm' : [[315, " 30 0 -80"], [315, " -30 0 -5"], [315, " -30 0 -80"], [315, "30 0 -5"]],
+    'body' : [[315, " 0 0 10"], [315, " 0 0 -10"], [315, " 0 0 10"], [315, "0 0 -10"]],
+    'box' : [[315, "0 0 0"]]
   }
 };
 
 AFRAME.registerComponent('numberblock', {
 
   init: function() {
-    this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
+    //this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
     this.animCount = 0;
+    this.currentBehaviour = "";
+    this.desiredBehaviour = "";
+    this.futureAaction = "";
+    this.futureActonTime = 0;
 
     this.lLeg = document.querySelector("#oneLLeg");
     this.rLeg = document.querySelector("#oneRLeg");
     this.lArm = document.querySelector("#oneLArm");
     this.rArm = document.querySelector("#oneRArm");
     this.whole = document.querySelector("#oneEntity");
+    this.body = document.querySelector("#oneBody");
+    this.box = document.querySelector("#oneBox");
 
     this.transitions = [];
 
@@ -175,7 +201,13 @@ AFRAME.registerComponent('numberblock', {
 
   setLimbsAnimation: function (action) {
 
-    var animData
+    // Of the available behaviours, only "wave" is not on repeat...
+    if ((action == this.currentBehaviour) &&
+        (action !== "wave")) {
+          return;
+      }
+
+
 
     switch (action) {
       case "walk":
@@ -217,6 +249,16 @@ AFRAME.registerComponent('numberblock', {
        this.addKeyFrames(animData, "stop")
        break;
 
+     case "floss":
+       var animData = {
+         'easing': "easeInOutQuad",
+         'repeat' : true,
+         'replace' : true
+       }
+       this.addKeyFrames(animData, "floss")
+       break;
+
+
      default:
        console.log("Unexpected action: " + action);
     }
@@ -232,7 +274,7 @@ AFRAME.registerComponent('numberblock', {
 
     var animData = {
       'msecs': (position.length() * 10000),
-      'easing': "easeInOutQuad",
+      'easing': "linear",
       'repeat' : false,
       'replace' : false,
       'position': `${this.el.object3D.position.x + position.x}
@@ -241,6 +283,10 @@ AFRAME.registerComponent('numberblock', {
     }
 
     this.whole.emit("addKeyFrame", animData, false);
+
+    this.futureAction = "stop";
+    this.futureActionTime = this.time + (position.length() * 10000);
+
   },
 
   turnTo: function(position) {
@@ -251,7 +297,7 @@ AFRAME.registerComponent('numberblock', {
     }
 
     var animData = {
-      'msecs': 500,
+      'msecs': 500 * Math.abs(targetAngle),
       'easing': "easeInOutQuad",
       'repeat' : false,
       'replace' : false,
@@ -292,7 +338,7 @@ AFRAME.registerComponent('numberblock', {
   addKeyFrames: function(animData, action) {
 
     var replace = animData.replace;
-    ["lLeg","rLeg","lArm","rArm"].forEach((part) => {
+    ["lLeg","rLeg","lArm","rArm","body","box"].forEach((part) => {
 
       animData.replace = replace;
 
@@ -305,38 +351,68 @@ AFRAME.registerComponent('numberblock', {
     });
   },
 
-  tick: function () {
-    // only ticks every 5 seconds.
+  tick: function (time, timeDelta) {
 
-    var choice = Math.floor(Math.random() * 4);
+    var action = "";
 
-    switch (choice) {
-      case 0: // walk.
+    this.time = time;
+
+    if ((this.futureActionTime !== 0) &&
+        (this.futureAction !== "") &&
+        (time > this.futureActionTime)) {
+      // time to implement a future action...
+      action = this.futureAction;
+      this.futureActionTime = 0;
+      this.futureAction = "";
+    }
+
+    if ((time % 5000) < ((time - timeDelta) % 5000)) {
+      // every 5 seconds.
+
+      var choice = Math.floor(Math.random() * 5);
+      action = ACTIONS[choice];
+    }
+
+    switch (action) {
+
+      case "walk":
         var x = Math.random() - 0.5;
         var z = Math.random() - 0.5;
         this.targetPosition.set(x, 0, z);
         this.walkTo(this.targetPosition);
         break;
 
-      case 1: // look
+      case "look":
         this.setLimbsAnimation("stop");
         this.lookLandR();
-
         break;
 
-      case 2: // wave
+      case "wave":
         this.setLimbsAnimation("wave");
         break;
 
-      case 3: // turn
+      case "turn":
         var x = Math.random() - 0.5;
         var z = Math.random() - 0.5;
         this.targetPosition.set(x, 0, z);
         this.turnTo(this.targetPosition);
+
+        // Note this doesn't affect any existing body/limb animations, which can
+        // continue along with the turn.
+        break;
+
+      case "floss":
+        this.setLimbsAnimation("floss");
+        break;
+
+      case "stop":
+        this.setLimbsAnimation("stop");
+        break;
+
+      default:
         break;
     }
   }
-
 });
 
 
