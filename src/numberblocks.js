@@ -297,7 +297,7 @@ AFRAME.registerComponent('numberblock', {
     }
 
     var animData = {
-      'msecs': 500 * Math.abs(targetAngle),
+      'msecs': 500 * Math.abs(targetAngle - this.whole.object3D.rotation.y),
       'easing': "easeInOutQuad",
       'repeat' : false,
       'replace' : false,
@@ -308,6 +308,9 @@ AFRAME.registerComponent('numberblock', {
   },
 
   lookLandR: function() {
+
+    // This can (and should) probably be refactored into table data like other
+    // movements are...
     var animData = {
       'msecs': 500,
       'easing': "easeInOutQuad",
@@ -515,22 +518,22 @@ AFRAME.registerComponent('keyframe-animation', {
 
   animateToKeyFrameComponent: function(component, current, keyFrame) {
 
-    // This random Delta is less than a msec.  It is added as a workaround for
-    // https://github.com/aframevr/aframe/issues/4810 where identical
-    // animations can't be requested consecutively.
-    const randDelta = Math.random();
-
     const target = keyFrame[component];
     const attribName = `animation__${component}`
     const attribString = `property: ${component};
                           from: ${current};
                           to: ${target};
                           easing: ${keyFrame.easing};
-                          dur: ${keyFrame.msecs + randDelta}`
+                          dur: ${keyFrame.msecs}`
 
     //console.log(`Animation on ${this.el.id} set as follows...`)
     //console.log(attribName);
     //console.log(attribString);
+
+    // Remove attribute before setting it, as recommended workaround for
+    // https://github.com/aframevr/aframe/issues/4810 where identical
+    // animations can't be requested consecutively.
+    this.el.removeAttribute(attribName);
     this.el.setAttribute(attribName, attribString);
 
   },
