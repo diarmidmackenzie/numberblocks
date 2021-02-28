@@ -139,6 +139,13 @@ const ANIMATIONS = {
     'rLeg' : [[500, " 0 0 0"], [2000, "0 0 0"]],
     'lArm' : [[500, " 0 0 30"], [2000, "0 0 30"]],
     'rArm' : [[500, " 0 0 -30"], [500, "0 0 -150"], [500, "0 0 -120"], [500, "0 0 -150"], [500, "0 0 -30"]]
+  },
+
+  'stop' : {
+    'lLeg' : [[500, "0 0 0"]],
+    'rLeg' : [[500, " 0 0 0"]],
+    'lArm' : [[500, " 0 0 30"]],
+    'rArm' : [[500, " 0 0 -30"]]
   }
 };
 
@@ -194,12 +201,45 @@ AFRAME.registerComponent('numberblock', {
       case "wave":
         var animData = {
           'easing': "easeInOutQuad",
-          'repeat' : true,
+          'repeat' : false,
           'replace' : true
         }
-
         this.addKeyFrames(animData, "wave")
         break;
+
+     case "look":
+       animData = {
+         'easing': "easeInOutQuad",
+         'repeat' : false,
+         'replace' : true
+       }
+       this.addKeyFrames(animData, "stop")
+       var animData = {
+         'msecs': 500,
+         'easing': "easeInOutQuad",
+         'repeat' : false,
+         'replace' : false,
+         'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI + 20} 0`
+       }
+       this.whole.emit("addKeyFrame", animData, false);
+       animData = {
+         'msecs': 500,
+         'easing': "easeInOutQuad",
+         'repeat' : false,
+         'replace' : false,
+         'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI - 20} 0`
+       }
+       this.whole.emit("addKeyFrame", animData, false);
+
+       animData = {
+         'msecs': 500,
+         'easing': "easeInOutQuad",
+         'repeat' : false,
+         'replace' : false,
+         'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI} 0`
+       }
+       this.whole.emit("addKeyFrame", animData, false);
+       break;
 
      default:
        console.log("Unexpected action: " + action);
@@ -210,20 +250,25 @@ AFRAME.registerComponent('numberblock', {
 
     this.setLimbsAnimation("walk");
 
-    // Turn to rotation...
+    // Turn to rotation...  we want to take the shorter
+    // (less than PI radians) direction of rotation.
     this.cylindrical.setFromVector3(position);
+    var targetAngle = this.cylindrical.theta
+    if (targetAngle - this.whole.object3D.rotation.y > Math.PI) {
+      targetAngle -= (2 * Math.PI);
+    }
 
     var animData = {
       'msecs': 500,
       'easing': "easeInOutQuad",
       'repeat' : false,
       'replace' : false,
-      'rotation': `0 ${this.cylindrical.theta * 180 / Math.PI} 0`
+      'rotation': `0 ${targetAngle * 180 / Math.PI} 0`
     }
 
     this.whole.emit("addKeyFrame", animData, false);
 
-    var animData = {
+    animData = {
       'msecs': (position.length() * 10000),
       'easing': "easeInOutQuad",
       'repeat' : false,
@@ -266,9 +311,8 @@ AFRAME.registerComponent('numberblock', {
         break;
 
       case 1:
-        this.setLimbsAnimation("panic");
+        this.setLimbsAnimation("look");
         break;
-
 
       case 2:
         this.setLimbsAnimation("wave");
@@ -324,6 +368,11 @@ AFRAME.registerComponent('keyframe-animation', {
   },
 
   animateToFirstKeyFrame: function() {
+
+    if (this.keyFrames.length <= 0) {
+      // No animations queued up.
+      return;
+    }
 
     this.animCount = 0;
     const keyFrame = this.keyFrames[0];
@@ -391,7 +440,7 @@ AFRAME.registerComponent('keyframe-animation', {
 
   tick: function(time, timeDelta) {
 
-    if ((this.keyFrames.length > 0) && (this.animCount == 0)) {
+    if (this.animCount == 0) {
       // animation requested, but none playing.  Start the first.
       this.animateToFirstKeyFrame();
     }
