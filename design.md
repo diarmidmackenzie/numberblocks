@@ -1,5 +1,9 @@
 
 
+!! Using Anime directly is difficult because about half the logic of the animation component is dedicated to making vectors in "0 0 0" form work with anime.js.  So maybe easier to stick with current function & wrap the animation component with keyframes function, rather than trying to use native anime.js keyframes function....
+
+
+
 Animations in GLTF clips (Blender) vs using anime.js?  General principles:
 
 - Use Blender where geometry is complex

@@ -175,7 +175,7 @@ AFRAME.registerComponent('numberblock', {
         animData = {
           'easing': "easeInOutQuad",
           'repeat' : true,
-          'replace' : true // !! WHen set to true this deletes too much... includng stuff we just created...
+          'replace' : true
         }
 
         this.addKeyFrames(animData, "walk")
@@ -259,13 +259,16 @@ AFRAME.registerComponent('numberblock', {
 
     switch (choice) {
       case 0:
-      case 1:
-      // !! Never going to a 2nd random location, why not?
         var x = Math.random() - 0.5;
         var z = Math.random() - 0.5;
         this.targetPosition.set(x, 0, z);
         this.walkTo(this.targetPosition);
         break;
+
+      case 1:
+        this.setLimbsAnimation("panic");
+        break;
+
 
       case 2:
         this.setLimbsAnimation("wave");
@@ -294,11 +297,9 @@ AFRAME.registerComponent('keyframe-animation', {
   attachEventListeners: function () {
 
     this.el.addEventListener('addKeyFrame', this.listeners.addKeyFrame, false);
-    //this.el.addEventListener('animationcomplete__', this.listeners.animationComplete, false);
     this.el.addEventListener('animationcomplete__rotation', this.listeners.animationComplete, false);
-    //this.el.addEventListener('animationcomplete__position', this.listeners.animationComplete, false);
-    //this.el.addEventListener('animationcomplete__scale', this.listeners.animationComplete, false);
-    //this.el.addEventListener('animationcomplete', this.listeners.animationComplete, false);
+    this.el.addEventListener('animationcomplete__position', this.listeners.animationComplete, false);
+    this.el.addEventListener('animationcomplete__scale', this.listeners.animationComplete, false);
   },
 
   addKeyFrame: function(event) {
