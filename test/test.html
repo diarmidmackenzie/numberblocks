@@ -1,0 +1,63 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script>
+      AFRAME.registerComponent('test-animations', {
+
+        init: function() {
+          this.listeners = {
+            animationComplete: this.animationComplete.bind(this)
+          }
+
+          this.el.addEventListener('animationcomplete', this.listeners.animationComplete, false);
+
+          this.animateRotation();
+        },
+
+        animationComplete: function() {
+          console.log("AnimationComplete")
+
+          this.animateRotation();
+        },
+
+        animateRotation: function() {
+          const randDelta = Math.random();
+          // workaround solution: add randDelta onto "dur" value, and all works fine...
+
+          var attribName = "animation";
+          angle = Math.floor(Math.random() * 10);
+          var attribValue = {"property": "rotation",
+                             "from": "0 0 0",
+                             "to": `0 0 ${angle}`,
+                             "dur": 1000};
+
+          this.el.setAttribute(attribName, attribValue);
+          console.log(`Starting New Animation, angle: ${angle}`);
+        }
+      });
+    </script>
+
+</head>
+<body>
+  <a-scene renderer="colorManagement:true">
+
+  <a-text position="-6 4 -5" color="black" width="5"
+          value="This scene exhibits a bug in the A-Frame Animation component.
+                 When 2 successive anuimations are requested with identical parameters, the
+                 2nd animation does not begin, and does not trigger an Animation Complete event.">
+  </a-text>
+  <a-text position="0 4 -5" color="black" width="5"
+          value="The box is being rotated by a random number of degrees 3-6.
+                 Each time a rotation completes (rotationcomplete event), we trigger another rotation
+                 This works OK until the same rotation is requested twice in a row
+                 At which point no rotation is performed, no RotationComplete event is generated
+                 And so the whole process comes to a halt.\n
+                 See Console Logs for a clear picture of what is happening on a given run.">
+  </a-text>
+
+  <a-box material = "color: red" position = "0 1 -2" test-animations>
+  </a-box>
+
+
+
+</body>

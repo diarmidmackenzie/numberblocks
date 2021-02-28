@@ -153,6 +153,7 @@ AFRAME.registerComponent('numberblock', {
 
   init: function() {
     this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
+    this.animCount = 0;
 
     this.lLeg = document.querySelector("#oneLLeg");
     this.rLeg = document.querySelector("#oneRLeg");
@@ -381,7 +382,7 @@ AFRAME.registerComponent('keyframe-animation', {
 
     this.keyFrames.push(keyFrame);
 
-    console.log("KeyFrames: " + this.keyFrames.length);
+    //console.log("KeyFrames: " + this.keyFrames.length);
 
   },
 
@@ -402,6 +403,7 @@ AFRAME.registerComponent('keyframe-animation', {
                                        ${this.el.object3D.position.z}`,
                                       keyFrame);
       this.animCount++;
+      //console.log(`Anim Count (pos) Incremented on: ${this.el.id} at ${this.time}`);
       this.animEndTime = Math.max(this.animEndTime, this.time + keyFrame.msecs);
     }
     if (keyFrame.rotation != null) {
@@ -411,6 +413,7 @@ AFRAME.registerComponent('keyframe-animation', {
                                        ${this.el.object3D.rotation.z * 180 / Math.PI}`,
                                        keyFrame);
       this.animCount++;
+      //console.log(`Anim Count (rot) Incremented on: ${this.el.id} at ${this.time}`);
       this.animEndTime = Math.max(this.animEndTime, this.time + keyFrame.msecs);
     }
     if (keyFrame.scale != null) {
@@ -420,6 +423,7 @@ AFRAME.registerComponent('keyframe-animation', {
                                        ${this.el.object3D.scale.z}`,
                                         keyFrame);
       this.animCount++;
+      //console.log(`Anim Count (sca) Incremented on: ${this.el.id} at  ${this.time}`);
       this.animEndTime = Math.max(this.animEndTime, this.time + keyFrame.msecs);
     }
 
@@ -435,19 +439,29 @@ AFRAME.registerComponent('keyframe-animation', {
 
   animateToKeyFrameComponent: function(component, current, keyFrame) {
 
+    // This random Delta is less than a msec.  It is added as a workaround for
+    // https://github.com/aframevr/aframe/issues/4810 where identical
+    // animations can't be requested consecutively.
+    const randDelta = Math.random();
+
     const target = keyFrame[component];
     const attribName = `animation__${component}`
     const attribString = `property: ${component};
                           from: ${current};
                           to: ${target};
                           easing: ${keyFrame.easing};
-                          dur: ${keyFrame.msecs}`
+                          dur: ${keyFrame.msecs + randDelta}`
+
+    //console.log(`Animation on ${this.el.id} set as follows...`)
+    //console.log(attribName);
+    //console.log(attribString);
     this.el.setAttribute(attribName, attribString);
 
   },
 
   animationComplete: function() {
 
+    //console.log(`Anim Count Decremented on: ${this.el.id} at ${this.time}`);
     this.animCount--;
 
     if (this.animCount <= 0) {
@@ -463,15 +477,15 @@ AFRAME.registerComponent('keyframe-animation', {
 
     this.time = time;
 
-    if (this.animCount == 0) {
+    if (this.animCount <= 0) {
       // animation requested, but none playing.  Start the first.
       this.animateToFirstKeyFrame();
     }
     else
     {
-      if (this.animEndTime > time + 1000) {
+      if (this.animEndTime > this.time + 1000) {
         // Failed to receive timely animation end event.
-        console.warn("Animation End Event Lost!")
+        console.warn(`Animation End Event Lost!  Anim count: ${this.AnimCount}, object: ${this.el.id}`);
         this.animCount = 0;
       }
     }
