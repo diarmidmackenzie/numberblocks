@@ -1,0 +1,113 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://unpkg.com/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/fernandojsg/aframe-teleport-controls@master/dist/aframe-teleport-controls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/diarmidmackenzie/key-bindings@v0.3-alpha/key-bindings.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/diarmidmackenzie/instanced-mesh@v0.2-alpha/src/instanced-mesh.min.js"></script>
+    <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.js"></script>
+    <script src="https://unpkg.com/super-hands/dist/super-hands.js"></script>
+    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <script src="../src/numberblocks.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/diarmidmackenzie/6dof-object-control@v0.5-alpha/src/keyboard-hand-controls.min.js"></script>
+  </script>
+
+</head>
+<body>
+  <a-scene physics="debug:true" renderer="colorManagement:true">
+
+  <a-mixin id="touch"
+        physics-collider phase-shift
+        collision-filter="collisionForces: false"
+        static-body="shape: sphere; sphereRadius:   0.02"
+        super-hands="colliderEvent: collisions;
+                     colliderEventProperty: els;
+                     colliderEndEvent: collisions;
+                     colliderEndEventProperty: clearedEls;">
+  </a-mixin>
+
+    <a-entity id="rig" movement-controls>
+      <a-entity id="camera"
+                camera position="0 1.6 0"
+                look-controls>
+      </a-entity>
+
+      <a-entity id="lhand"
+                position = "-0.2 1 -1"
+                visible="true"
+                mixin="touch"
+                hand-controls="hand: left">
+      </a-entity>
+      <a-entity id="rhand"
+                position = "0.2 1 -1"
+                visible="true"
+                mixin="touch"
+                hand-controls="hand: right">
+      </a-entity>
+    </a-entity>
+
+<!-- assets-->
+    <a-asset-item id="face1"
+        src="../assets/faces/face1.glb"
+        response-type="arraybuffer" crossorigin="anonymous"></a-asset-item>
+    <a-asset-item id="limb1"
+        src="../assets/limbs/limb.glb"
+        response-type="arraybuffer" crossorigin="anonymous"></a-asset-item>
+
+<a-box id = "bench" static-body material = "color:#774411" height = "0.9" width = "2" depth = "1.5" position = "0 0.45 -1" ammo-body="type: static">
+</a-box>
+
+<a-entity id = "oneEntity" dynamic-body keyframe-animation position = "0 1.01 -1" numberblock >
+  <a-box id = "oneBody" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" keyframe-animation>
+  </a-box>
+
+  <a-entity gltf-model="#face1"
+            keyframe-animation
+            scale="0.05 0.05 0.05"
+            position="0 0 0.05">
+  </a-entity>
+  <a-entity id = "oneLArm" gltf-model="#limb1"
+            scale="0.05 0.05 0.05"
+            keyframe-animation
+            position="0.05 0 0"
+            rotation="0 0 30">
+  </a-entity>
+  <a-entity id = "oneRArm" gltf-model="#limb1"
+            keyframe-animation
+            scale="0.05 0.05 0.05"
+            position="-0.05 0 0"
+            rotation="0 0 -30">
+  </a-entity>
+  <a-entity id = "oneLLeg" gltf-model="#limb1"
+            keyframe-animation
+            scale="0.05 0.05 0.05"
+            position="0.02 -0.04 0"
+            rotation="0 0 0">
+  </a-entity>
+  <a-entity id = "oneRLeg" gltf-model="#limb1"
+            keyframe-animation
+            scale="0.05 0.05 0.05"
+            position="-0.02 -0.04 0"
+            rotation="0 0 0">
+  </a-entity>
+
+</a-entity>
+
+<!-- Floor-->
+<a-entity id="floor-mesh1"
+       bevelled-tile="facecolor: #020202; framecolor: black; width: 1; depth:1; frame: 0.015"
+       instanced-mesh="capacity:400" tetrisland-floor
+       position = "0 0 0"></a-entity>
+
+<a-plane id="floor-plane"
+       width = "12" height = "12" rotation = "90 0 0"
+       static-body
+       position = "0 0 0">
+     </a-plane>
+
+</a-scene>
+
+
+</body>
