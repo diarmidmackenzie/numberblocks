@@ -1,0 +1,165 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.js"></script>
+    <script>
+      AFRAME.registerComponent('moving-dynamic-body', {
+
+        schema: {
+          vx:      {type: 'number', default: NaN},
+          vy:      {type: 'number', default: NaN},
+          vz:      {type: 'number', default: NaN},
+          avx:     {type: 'number', default: NaN},
+          avy:     {type: 'number', default: NaN},
+          avz:     {type: 'number', default: NaN},
+          damping: {type: 'number', default: 1}  // values 0 to 1.  1 is 100% control; 0 is no control.
+        },
+
+        init: function () {
+
+          this.el.addEventListener("body-loaded", e => {
+            // cache the ammo-body component
+            this.ammo = this.el.components["ammo-body"];
+
+            // A vector to use for velocity (saving costly reallocations)
+            const data = this.data;
+            this.velocityConfig = new Ammo.btVector3(data.vx, data.vy, data.vz);
+            this.angularVelocityConfig = new Ammo.btVector3(data.avx, data.avy, data.avz);
+            this.velocity = new Ammo.btVector3();
+            this.angularVelocity = new Ammo.btVector3();
+          });
+        },
+
+        update: function () {
+          const data = this.data;
+          if (this.ammo) {
+            this.velocityConfig.setValue(data.vx, data.vy, data.vz);
+            this.angularVelocityConfig.setValue(data.avx, data.avy, data.avz);
+          }
+        },
+
+        // returns true if vector contains any values that are not NaN.
+        vectorHasData: function (vector) {
+
+          const noData = (isNaN(vector.x()) &&
+                          isNaN(vector.y()) &&
+                          isNaN(vector.z()));
+
+          return(!noData);
+        },
+
+        // Looks at z, y & z components of a.
+        // for any that are not NaN, apply them to a.
+        applyValidData: function (a, b, damping) {
+
+          if (!isNaN(b.x())) {
+            a.setX((1 - damping) * a.x() + damping * b.x());
+          }
+
+          if (!isNaN(b.y())) {
+            a.setY((1 - damping) * a.y() + damping * b.y());
+          }
+
+          if (!isNaN(b.z())) {
+            a.setZ((1 - damping) * a.z() + damping * b.z());
+          }
+        },
+
+        tick: function(time, timeDelta) {
+          const data = this.data;
+          if (this.ammo) {
+
+            if (this.vectorHasData(this.velocityConfig)) {
+              this.velocity = this.el.body.getLinearVelocity();
+              this.applyValidData(this.velocity, this.velocityConfig, data.damping);
+              this.el.body.setLinearVelocity(this.velocity);
+              this.el.body.activate(true);
+            }
+
+            if (this.vectorHasData(this.angularVelocityConfig)) {
+              this.angularVelocity = this.el.body.getAngularVelocity();
+              this.applyValidData(this.angularVelocity, this.angularVelocityConfig, data.damping);
+              this.el.body.setAngularVelocity(this.angularVelocity);
+              this.el.body.activate(true);
+            }
+          }
+        },
+
+        remove: function() {
+          if (this.velocityConfig) {
+            Ammo.destroy(this.velocityConfig)
+          }
+          if (this.angularVelocityConfig) {
+            Ammo.destroy(this.angularVelocityConfig)
+          }
+          if (this.velocity) {
+            Ammo.destroy(this.velocity)
+          }
+          if (this.angularVelocity) {
+            Ammo.destroy(this.angularVelocity)
+          }
+        }
+      });
+    </script>
+
+</head>
+<body>
+  <a-scene stats physics="driver: ammo; debug: true; debugDrawMode: 1;" renderer="colorManagement:true">
+
+    <a-entity id="rig" movement-controls>
+      <a-entity id="camera"
+                camera position="0 1.6 0"
+                look-controls>
+      </a-entity>
+    </a-entity>
+
+    <a-box id = "bench"
+           ammo-body="type: static"
+           ammo-shape="type: box"
+           material = "color:#774411"
+           height = "0.9"
+           width = "2"
+           depth = "4"
+           position = "0 0.45 -2"
+           ammo-body="type: static">
+    </a-box>
+
+    <a-box id = "wall"
+           ammo-body="type: static"
+           ammo-shape="type: box"
+           material = "color:#774411"
+           height = "3"
+           width = "2"
+           depth = "1"
+           position = "0 1.5 -4.5"
+           ammo-body="type: static">
+    </a-box>
+
+    <a-box id = "test1"
+           ammo-body="type: dynamic;"
+           ammo-shape="type: box"
+           material = "color:#dd1111"
+           height = "0.1"
+           width = "0.1"
+           depth = "0.1"
+           position = "-0.5 1 -1"
+           moving-dynamic-body="vz:-2">
+    </a-box>
+
+    <a-entity id = "test2"
+              ammo-body="type: dynamic;"
+              ammo-shape="type: box; fit:manual;halfExtents:0.05 0.05 0.05"
+              position = "0.5 1 -1"
+              moving-dynamic-body="avy:5">
+        <a-box material = "color:#dd1111"
+               height = "0.1"
+               width = "0.1"
+               depth = "0.1">
+        </a-box>
+    </a-entity>
+
+
+  </a-scene>
+</body>

@@ -1,0 +1,54 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.js"></script>
+    <script>
+      AFRAME.registerComponent('moving-dynamic-body', {
+
+        tick: function() {
+          this.el.object3D.position.x += 0.001;
+          if (this.el.components["dynamic-body"]) {
+            this.el.components["dynamic-body"].syncToPhysics()
+          }
+        }
+      });
+
+    </script>
+
+
+</head>
+<body>
+  <a-scene physics="debug: true;" renderer="colorManagement:true">
+
+
+    <a-entity id="rig" movement-controls>
+      <a-entity id="camera"
+                camera position="0 1.6 0"
+                look-controls>
+      </a-entity>
+    </a-entity>
+
+    <a-box id = "bench"
+           static-body
+           material = "color:#774411"
+           height = "0.9"
+           width = "2"
+           depth = "1.5"
+           position = "0 0.45 -1">
+    </a-box>
+
+    <a-box id = "test1"
+           dynamic-body
+           material = "color:#dd1111"
+           height = "0.1"
+           width = "0.1"
+           depth = "0.1"
+           position = "-0.5 1 -1"
+           moving-dynamic-body>
+    </a-box>
+
+  </a-scene>
+
+
+</body>

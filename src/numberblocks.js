@@ -101,19 +101,19 @@ AFRAME.registerComponent('tetrisland-floor', {
   }
 });
 
-AFRAME.registerComponent('phase-shift', {
+AFRAME.registerComponent('ammo-phase-shift', {
   init: function () {
     var el = this.el
     el.addEventListener('gripdown', function () {
-      el.setAttribute('collision-filter', {collisionForces: true})
+      el.setAttribute('ammo-body', {disableCollision: false})
     })
     el.addEventListener('gripup', function () {
-      el.setAttribute('collision-filter', {collisionForces: false})
+      el.setAttribute('ammo-body', {disableCollision: true})
     })
   }
 });
 
-const ACTIONS = ["walk", "look", "wave", "turn", "floss", "stop"];
+const ACTIONS = ["walk", "look", "wave", "turn", "floss", "stop", "turn"];
 
 const ANIMATIONS = {
 /*  'walk' : {
@@ -166,7 +166,14 @@ const ANIMATIONS = {
     'rArm' : [[315, " 30 0 -80"], [315, " -30 0 -5"], [315, " -30 0 -80"], [315, "30 0 -5"]],
     'body' : [[315, " 0 0 10"], [315, " 0 0 -10"], [315, " 0 0 10"], [315, "0 0 -10"]],
     'box' : [[315, "0 0 0"]]
+  },
+
+  'turn' : {
+    'lLeg' : [[500, "0 0 5"], [500, "0 0 -5"]],
+    'rLeg' : [[500, " 0 0 -5"], [500, "0 0 5"]],
+
   }
+
 };
 
 AFRAME.registerComponent('numberblock', {
@@ -174,10 +181,8 @@ AFRAME.registerComponent('numberblock', {
   init: function() {
     //this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
     this.animCount = 0;
+    this.grabbed = false;
     this.currentBehaviour = "";
-    this.desiredBehaviour = "";
-    this.futureAaction = "";
-    this.futureActonTime = 0;
 
     this.lLeg = document.querySelector("#oneLLeg");
     this.rLeg = document.querySelector("#oneRLeg");
@@ -192,12 +197,38 @@ AFRAME.registerComponent('numberblock', {
     this.cylindrical = new THREE.Cylindrical;
     this.targetPosition = new THREE.Vector3;
 
+    // Final bit of initialization can complete when the physics engine is
+    // initialized
+    this.el.addEventListener("body-loaded", e => {
+      // cache the ammo-body component
+      this.ammo = this.el.components["ammo-body"];
+
+    });
+
+    this.listeners = {
+      'grabStart': this.grabStart.bind(this),
+      'grabEnd': this.grabEnd.bind(this),
+    }
+
+    this.callbacks = {
+      'stopMovement' : this.stopMovement.bind(this)
+    };
+
+    this.el.addEventListener('grab-start', this.listeners.grabStart);
+    this.el.addEventListener('grab-end', this.listeners.grabEnd);
   },
-/*
-  play: function () {
-    this.targetPosition.set(0.5, 0 -0.5);
-    this.walkTo(this.targetPosition);
-  },*/
+
+  grabStart: function () {
+    console.log("Grab start")
+    this.grabbed = true;
+    this.setLimbsAnimation("panic");
+  },
+
+  grabEnd: function () {
+    console.log("Grab end")
+    this.grabbed = false;
+    this.setLimbsAnimation("stop");
+  },
 
   setLimbsAnimation: function (action) {
 
@@ -207,7 +238,8 @@ AFRAME.registerComponent('numberblock', {
           return;
       }
 
-
+    console.log("Requested action: " + action);
+    this.currentBehaviour = action;
 
     switch (action) {
       case "walk":
@@ -264,47 +296,10 @@ AFRAME.registerComponent('numberblock', {
     }
   },
 
-  walkTo: function(position) {
-
-    this.setLimbsAnimation("walk");
-
-    // Turn to rotation...  we want to take the shorter
-    // (less than PI radians) direction of rotation.
-    this.turnTo(position);
-
-    var animData = {
-      'msecs': (position.length() * 10000),
-      'easing': "linear",
-      'repeat' : false,
-      'replace' : false,
-      'position': `${this.el.object3D.position.x + position.x}
-                   ${this.el.object3D.position.y}
-                   ${this.el.object3D.position.z + position.z}`
-    }
-
-    this.whole.emit("addKeyFrame", animData, false);
-
-    this.futureAction = "stop";
-    this.futureActionTime = this.time + (position.length() * 10000);
-
-  },
-
-  turnTo: function(position) {
-    this.cylindrical.setFromVector3(position);
-    var targetAngle = this.cylindrical.theta
-    if (targetAngle - this.whole.object3D.rotation.y > Math.PI) {
-      targetAngle -= (2 * Math.PI);
-    }
-
-    var animData = {
-      'msecs': 500 * Math.abs(targetAngle - this.whole.object3D.rotation.y),
-      'easing': "easeInOutQuad",
-      'repeat' : false,
-      'replace' : false,
-      'rotation': `0 ${targetAngle * 180 / Math.PI} 0`
-    }
-
-    this.whole.emit("addKeyFrame", animData, false);
+  stopMovement: function () {
+    this.setLimbsAnimation("stop");
+    this.el.removeAttribute("db-velocity__vel");
+    this.el.removeAttribute("db-velocity__angvel");
   },
 
   lookLandR: function() {
@@ -358,18 +353,9 @@ AFRAME.registerComponent('numberblock', {
 
     var action = "";
 
-    this.time = time;
-
-    if ((this.futureActionTime !== 0) &&
-        (this.futureAction !== "") &&
-        (time > this.futureActionTime)) {
-      // time to implement a future action...
-      action = this.futureAction;
-      this.futureActionTime = 0;
-      this.futureAction = "";
-    }
-
-    if ((time % 5000) < ((time - timeDelta) % 5000)) {
+    if (((time % 5000) < ((time - timeDelta) % 5000)) &&
+        (!this.grabbed))
+     {
       // every 5 seconds.
 
       var choice = Math.floor(Math.random() * 5);
@@ -379,10 +365,18 @@ AFRAME.registerComponent('numberblock', {
     switch (action) {
 
       case "walk":
-        var x = Math.random() - 0.5;
-        var z = Math.random() - 0.5;
-        this.targetPosition.set(x, 0, z);
-        this.walkTo(this.targetPosition);
+        this.setLimbsAnimation("walk");
+        var angle = Math.random() * Math.PI * 2;
+        var x = 0.3 * Math.sin(angle);
+        var z = 0.3 * Math.cos(angle);
+
+        this.el.setAttribute("db-rotation",
+                            {'y': (angle * 180 / Math.PI)});
+        this.el.setAttribute("db-velocity__vel",
+                            {'x': x, 'z': z});
+        setTimeout(this.callbacks.stopMovement, Math.random() * 1000 + 1000)
+
+        //this.walkTo(this.targetPosition);
         break;
 
       case "look":
@@ -395,10 +389,12 @@ AFRAME.registerComponent('numberblock', {
         break;
 
       case "turn":
-        var x = Math.random() - 0.5;
-        var z = Math.random() - 0.5;
-        this.targetPosition.set(x, 0, z);
-        this.turnTo(this.targetPosition);
+        this.setLimbsAnimation("turn");
+        this.el.setAttribute("db-velocity__angvel",
+                             {'y': 5 * Math.sign(Math.random() - 0.5),
+                              'angular': true,
+                              maxAcceleration: 500});
+        setTimeout(this.callbacks.stopMovement, Math.random() * 1000)
 
         // Note this doesn't affect any existing body/limb animations, which can
         // continue along with the turn.
@@ -508,6 +504,7 @@ AFRAME.registerComponent('keyframe-animation', {
 
     // If the keyFrame is to be repeated, add it to the end of the list.
     if (keyFrame.repeat) {
+      //console.log("Adding keyFrame to end of list")
       this.keyFrames.push(keyFrame);
     }
 
@@ -578,7 +575,6 @@ AFRAME.registerComponent('keyframe-animation', {
   }
 });
 
-
 /* Animations design....
 
 Need concept of keyframes for e.g. waving.
@@ -622,13 +618,301 @@ keyframe-animation component...
 
 */
 
+/* Velocity (linear or angular) on a dynamic body - assumed to be an Ammo body
+   of type dynamic.
+   This component allows for:
+   - The fact that the dynamic body is under management of the Ammo physics
+     engine.
+   - Maintaining the velocity even in the face of external forces, which
+     might include friction, gravity & collisions...
+   - But doing so subject to a configurable maximum acceleration in m/s/s.    */
+AFRAME.registerComponent('db-velocity', {
 
-AFRAME.registerComponent('moving-dynamic-body', {
+  // Multiple allowed so that both angular and linear velocity components can
+  // be configured on a single entity.
+  multiple: true,
 
-  tick: function() {
-    if (this.el.components["dynamic-body"]) {
-      this.el.components["dynamic-body"].syncToPhysics()
+  schema: {
+    x:      {type: 'number', default: NaN},
+    y:      {type: 'number', default: NaN},
+    z:      {type: 'number', default: NaN},
+    // Max Acceleration m/s^2.  Default is approx 1.5G - enough to counter gravity.
+    // For implementation simplicity & performance, this is applied independently
+    // in each axis (XYZ) so true max acceleration can be higher than this if
+    // accelerating in all axes at once.
+    maxAcceleration: {type: 'number', default: 15},
+    // True for angular velocity, false for linear velocity.
+    angular: {type: 'boolean', default: false}
+  },
+
+  init: function () {
+
+    if (this.el.components["ammo-body"]) {
+      this.initialize();
+    }
+    else {
+      this.el.addEventListener("body-loaded", e => {
+        // cache the ammo-body component
+        this.initialize();
+      });
+    }
+  },
+
+  initialize: function () {
+    this.ammo = this.el.components["ammo-body"];
+
+    // A vector to use for velocity (saving costly reallocations)
+    const data = this.data;
+    this.velocityConfig = new Ammo.btVector3(data.x, data.y, data.z);
+    this.velocity = new Ammo.btVector3();
+  },
+
+  update: function () {
+    const data = this.data;
+    if (this.ammo) {
+      this.velocityConfig.setValue(data.x, data.y, data.z);
+    }
+  },
+
+  // Looks at z, y & z components of b.
+  // for any that are not NaN, apply them to a.
+  // but don't exceed maxDelta change from a.
+  applyValidData: function (a, b, maxDelta) {
+
+    if (!isNaN(b.x())) {
+      a.setX(a.x() + allowedDelta(a.x(), b.x(), maxDelta));
+    }
+
+    if (!isNaN(b.y())) {
+      a.setY(a.y() + allowedDelta(a.y(), b.y(), maxDelta));
+    }
+    if (!isNaN(b.z())) {
+      a.setZ(a.z() + allowedDelta(a.z(), b.z(), maxDelta));
+    }
+
+    function allowedDelta(a, b, maxDelta) {
+      var velDelta = b - a;
+
+      if (Math.abs(velDelta) > maxDelta) {
+        velDelta = Math.sign(velDelta) * maxDelta;
+      }
+
+      return(velDelta);
+    }
+  },
+
+  tick: function(time, timeDelta) {
+    const data = this.data;
+
+    // How much velocity can change by depends on timeDelta + max acceleration
+    const maxVelocityChange  = (data.maxAcceleration * timeDelta)/1000
+
+    if (this.ammo) {
+
+      if (data.angular) {
+        this.velocity = this.el.body.getAngularVelocity();
+      }
+      else
+      {
+        this.velocity = this.el.body.getLinearVelocity();
+      }
+      this.applyValidData(this.velocity,
+                          this.velocityConfig,
+                          maxVelocityChange);
+      if (data.angular) {
+        this.el.body.setAngularVelocity(this.velocity);
+      }
+      else
+      {
+        this.el.body.setLinearVelocity(this.velocity);
+      }
+      this.el.body.activate(true);
+    }
+  },
+
+  remove: function() {
+    if (this.velocityConfig) {
+      Ammo.destroy(this.velocityConfig)
+    }
+    if (this.velocity) {
+      Ammo.destroy(this.velocity)
     }
   }
+});
 
+/* Set position on a dynamic body - assumed to be an Ammo body
+   of type dynamic.
+   This component allows for:
+   - The fact that the dynamic body is under management of the Ammo physics
+     engine.
+   - Moving as swiftly as possible to the desired position, subject to the
+     impacts and constraints of the physical world.
+   - Respecting configured limits on both acceleration and velocity. */
+
+AFRAME.registerComponent('db-position', {
+
+  schema: {
+    x:      {type: 'number', default: NaN},
+    y:      {type: 'number', default: NaN},
+    z:      {type: 'number', default: NaN},
+    // Max Acceleration m/s^2.  Default is approx 1.5G - enough to counter gravity.
+    // For implementation simplicity & performance, this is applied independently
+    // in each axis (XYZ) so true max acceleration can be higher than this if
+    // accelerating in all axes at once.
+    maxAcceleration: {type: 'number', default: 15},
+
+    // Max Speed.  Default is 5m/s (18kph).
+    // For implementation simplicity & performance, this is applied independently
+    // in each axis (XYZ) so true max speed can be higher than this if
+    // moving in all axes at once.
+    maxSpeed: {type: 'number', default: 5},
+
+  },
+
+  init: function () {
+    this.vector = new THREE.Vector3();
+  },
+
+  tick: function(time, timeDelta) {
+
+    var data = this.data;
+
+    // assess delta from current position to desired position.
+    this.vector.setX(constrain(data.x - this.el.object3D.position.x, data.maxSpeed));
+    this.vector.setY(constrain(data.y - this.el.object3D.position.y, data.maxSpeed));
+    this.vector.setZ(constrain(data.z - this.el.object3D.position.z, data.maxSpeed));
+
+    function constrain(component, maxSpeed) {
+      var vel = component;
+      if (Math.abs(vel) > maxSpeed) {
+        vel = Math.sign(vel) * maxSpeed;
+      }
+      return(vel);
+    }
+
+    // this.vector now contains the desired straight line movement towards the
+    // target for axes specified, and NaNs where no target position was specified.
+    this.el.setAttribute("db-velocity__vel",
+                         {'x': this.vector.x,
+                          'y': this.vector.y,
+                          'z': this.vector.z,
+                          'maxAcceleration': data.maxAcceleration});
+
+    // As position gets to the specified position, velocity should naturally drop
+    // to zero.
+  }
+});
+
+
+  /* Set rotation on a dynamic body - assumed to be an Ammo body
+     of type dynamic.
+     This component allows for:
+     - The fact that the dynamic body is under management of the Ammo physics
+       engine.
+     - Moving as swiftly as possible to the desired orientation, subject to the
+       impacts and constraints of the physical world.
+     - Respecting configured limits on both angular acceleration and
+       angular velocity. */
+
+  AFRAME.registerComponent('db-rotation', {
+
+    schema: {
+      x:      {type: 'number', default: NaN},
+      y:      {type: 'number', default: NaN},
+      z:      {type: 'number', default: NaN},
+      // Max Acceleration rad/s^2.  Default is 3.  No particular reason, just seems
+      // reasonable...
+      maxAcceleration: {type: 'number', default: 1000},
+
+      // Max Angular Speed in radians/second.  Default is 1.5 (approx a half-turn)
+      // For implementation simplicity & performance, this is applied independently
+      // in each axis (XYZ) so true max speed can be higher than this if
+      // moving in all axes at once.
+      maxSpeed: {type: 'number', default: 500},
+
+    },
+
+    init: function () {
+      this.vector = new THREE.Vector3();
+      //  this.euler = new THREE.Euler();
+    },
+
+    tick: function(time, timeDelta) {
+
+      var data = this.data;
+      const objectRotation = foo();
+
+      // assess delta from current position to desired position.
+      // check for NaN's first to avoid unecessary calculations.
+      if (!isNaN(data.x)) {
+        this.vector.setX(rotation(objectRotation('x', this.el.object3D.quaternion), degToRad(data.x), data.maxSpeed));
+      }
+
+      if (!isNaN(data.y)) {
+        this.vector.setY(rotation(objectRotation('y',  this.el.object3D.quaternion), degToRad(data.y), data.maxSpeed));
+      }
+      if (!isNaN(data.z)) {
+        this.vector.setZ(rotation(objectRotation('z',  this.el.object3D.quaternion), degToRad(data.z), data.maxSpeed));
+      }
+
+      // If you just take the rotation value from the Euler, in the default XYZ order
+      // you may find e.g. that Y rotation never goes past +/- PI/2.
+      // so we explicitly decompose to an Euler with the desired axis primary.
+      function foo() {
+
+        var euler = new THREE.Euler();
+
+        return (function(value, quaternion) {
+          var rotation
+
+          switch (value) {
+
+            case 'x':
+              euler.setFromQuaternion(quaternion, "XYZ");
+              rotation = euler.x;
+              break;
+
+            case 'y':
+              euler.setFromQuaternion(quaternion, "YZX");
+              rotation = euler.y;
+              break;
+
+            case 'z':
+              euler.setFromQuaternion(quaternion, "ZXY");
+              rotation = euler.z;
+              break;
+          }
+
+          return(rotation);
+        });
+      }
+
+      function degToRad(deg) {
+        return (deg * Math.PI / 180);
+      }
+
+      function rotation(from, to, max) {
+
+        // Not matching exact revolutions.  Find fastest rotation
+        // We can turn in either direction and 1, 361, 721 etc.
+        // all mean the same thing.
+        var rotation = (to - from) % (Math.PI * 2);
+        if (Math.abs(rotation) > Math.PI ) {
+          rotation = rotation - Math.PI * 2;
+        }
+
+        return(rotation * 20);
+      }
+
+      // this.vector now contains the desired rotation for axes specified,
+      // and NaNs where no target position was specified.
+      // Apply it to the object using the db-velocity component, applying
+      // angular velocity.
+      this.el.setAttribute("db-velocity__angvel",
+                           {'x': this.vector.x,
+                            'y': this.vector.y,
+                            'z': this.vector.z,
+                            'maxAcceleration': data.maxAcceleration,
+                            'angular': true});
+    }
 });

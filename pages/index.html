@@ -1,7 +1,6 @@
 <html>
   <head>
-    <!--<script src="../../aframe/aframe.js"></script>-->
-    <script src="https://aframe.io/releases/1.1.0/aframe.min.js"></script>
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
     <script src="https://unpkg.com/aframe-event-set-component@5.0.0/dist/aframe-event-set-component.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/fernandojsg/aframe-teleport-controls@master/dist/aframe-teleport-controls.min.js"></script>
@@ -9,27 +8,57 @@
     <script src="https://cdn.jsdelivr.net/gh/diarmidmackenzie/instanced-mesh@v0.2-alpha/src/instanced-mesh.min.js"></script>
     <script src="https://mixedreality.mozilla.org/ammo.js/builds/ammo.wasm.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/n5ro/aframe-physics-system@v4.0.1/dist/aframe-physics-system.js"></script>
-    <script src="https://unpkg.com/super-hands/dist/super-hands.js"></script>
-    <script src="https://unpkg.com/aframe-physics-extras/dist/aframe-physics-extras.min.js"></script>
+    <script src="../../aframe-super-hands-component/dist/super-hands.js"></script>
     <script src="../src/numberblocks.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/diarmidmackenzie/6dof-object-control@v0.5-alpha/src/keyboard-hand-controls.min.js"></script>
+
   </script>
 
 </head>
 <body>
-  <a-scene physics="debug:true" renderer="colorManagement:true">
+  <a-scene physics="driver: ammo; debug: true; debugDrawMode: 1;" renderer="colorManagement:true">
 
   <a-mixin id="touch"
-        physics-collider phase-shift
-        collision-filter="collisionForces: false"
-        static-body="shape: sphere; sphereRadius:   0.02"
-        super-hands="colliderEvent: collisions;
-                     colliderEventProperty: els;
-                     colliderEndEvent: collisions;
-                     colliderEndEventProperty: clearedEls;">
-  </a-mixin>
+           ammo-phase-shift
+           ammo-body="type: kinematic; emitCollisionEvents: true; disableCollision: true"
+           ammo-shape="fit: manual; type:sphere; sphereRadius: 0.02"
+           super-hands="colliderEvent: collidestart;
+                        colliderEventProperty: targetEl;
+                        colliderEndEvent: collideend;
+                        colliderEndEventProperty: targetEl">
 
-    <a-entity id="rig" movement-controls>
+  </a-mixin>
+  <!--static-body="shape: sphere; sphereRadius:   0.02"-->
+
+
+  <a-entity id="rig" movement-controls>
+    <a-text value="Press Left Shift or Right Shift to choose a controller to operate via kays.\n
+                   Use debug mode on the physics engine to see controller positions.
+                   Press 1, 2 or 3 to x, y or z,
+                   then -/= to move in that direction.\n
+                   Press 7 then + to Grip (+ again to un-grip)\n
+                   Also, use 4/5/6 to rotate controller around x/y/z axes."
+                   position="-7 1 -5" color="grey"></a-text>
+    <a-camera position="0 1.6 0" look-controls>
+      <a-text id="log-panel1" wrapCount=80 width="1" value="L Hand Keyboard Sim Data" position="-2 .75 -1.5" color="grey"></a-text>
+      <a-text id="log-panel2" wrapCount=80 width="1" value="R Hand Keyboard Data" position="1 0.75 -1.5" color="grey"></a-text>
+    </a-camera>
+  </a-entity>
+    <a-entity id="lhand" mixin="touch"
+              hand-controls="hand: left"
+              keyboard-hand-controls="logger:#log-panel1"
+              key-bindings="bindings:ShiftLeft=enable,ShiftRight=disable"
+              position="-0.3 1.1 -1">
+    </a-entity>
+    <a-entity id="rhand" mixin="touch"
+              hand-controls="hand: right"
+              keyboard-hand-controls="logger:#log-panel2"
+              key-bindings="bindings:ShiftRight=enable,ShiftLeft=disable"
+              position="0.3 1.1 -1">
+    </a-entity>
+
+
+  <!--  <a-entity id="rig" movement-controls>
       <a-entity id="camera"
                 camera position="0 1.6 0"
                 look-controls>
@@ -47,7 +76,7 @@
                 mixin="touch"
                 hand-controls="hand: right">
       </a-entity>
-    </a-entity>
+    </a-entity>-->
 
 <!-- assets-->
     <a-asset-item id="face1"
@@ -57,12 +86,24 @@
         src="../assets/limbs/limb.glb"
         response-type="arraybuffer" crossorigin="anonymous"></a-asset-item>
 
-<a-box id = "bench" static-body material = "color:#774411" height = "0.9" width = "2" depth = "1.5" position = "0 0.45 -1" ammo-body="type: static">
+<a-box id = "bench" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.9" width = "2" depth = "1.5" position = "0 0.45 -1" ammo-body="type: static">
 </a-box>
 
-<a-entity id = "oneEntity" dynamic-body keyframe-animation position = "0 1.01 -1" numberblock>
+<!--<a-entity id = "test" ammo-body="type: dynamic" ammo-shape="type: box; fit:manual;halfExtents:0.05 0.05 0.05" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" position = "0 3 -1">
+  <a-box material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1">
+  </a-box>
+</a-entity>-->
+
+
+<a-entity id = "oneEntity"
+          ammo-body="type: dynamic"
+          ammo-shape="type: box; fit:manual;halfExtents:0.05 0.0825 0.05"
+          keyframe-animation
+          position = "0 1.01575 -1"
+          numberblock
+          grabbable="constraintComponentName: ammo-constraint">
   <a-entity id = "oneBody" keyframe-animation>
-  <a-box id = "oneBox" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" keyframe-animation>
+  <a-box id = "oneBox" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" keyframe-animation position="0 0.0375 0">
 
     <a-entity gltf-model="#face1"
               keyframe-animation
@@ -74,25 +115,25 @@
   <a-entity id = "oneLArm" gltf-model="#limb1"
             scale="0.05 0.05 0.05"
             keyframe-animation
-            position="0.05 0 0"
+            position="0.05 0.0375 0"
             rotation="0 0 30">
   </a-entity>
   <a-entity id = "oneRArm" gltf-model="#limb1"
             keyframe-animation
             scale="0.05 0.05 0.05"
-            position="-0.05 0 0"
+            position="-0.05 0.0375 0"
             rotation="0 0 -30">
   </a-entity>
   <a-entity id = "oneLLeg" gltf-model="#limb1"
             keyframe-animation
             scale="0.05 0.05 0.05"
-            position="0.02 -0.04 0"
+            position="0.02 -0.0075 0"
             rotation="0 0 0">
   </a-entity>
   <a-entity id = "oneRLeg" gltf-model="#limb1"
             keyframe-animation
             scale="0.05 0.05 0.05"
-            position="-0.02 -0.04 0"
+            position="-0.02 -0.0075 0"
             rotation="0 0 0">
   </a-entity>
 
@@ -108,7 +149,7 @@
 
 <a-plane id="floor-plane"
        width = "12" height = "12" rotation = "90 0 0"
-       static-body
+       ammo-body="type: static" ammo-shape="type: plane"
        position = "0 0 0">
      </a-plane>
 
