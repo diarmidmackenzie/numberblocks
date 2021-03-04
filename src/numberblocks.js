@@ -298,6 +298,7 @@ AFRAME.registerComponent('numberblock', {
 
   stopMovement: function () {
     this.setLimbsAnimation("stop");
+    this.el.removeAttribute("db-rotation");
     this.el.removeAttribute("db-velocity__vel");
     this.el.removeAttribute("db-velocity__angvel");
   },
