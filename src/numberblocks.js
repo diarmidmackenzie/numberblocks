@@ -113,7 +113,7 @@ AFRAME.registerComponent('ammo-phase-shift', {
   }
 });
 
-const ACTIONS = ["walk", "look", "wave", "turn", "floss", "stop", "turn"];
+const ACTIONS = ["walk", "look", "wave", "turn", "floss", "stop", "turn", "jump"];
 
 const ANIMATIONS = {
 /*  'walk' : {
@@ -172,7 +172,14 @@ const ANIMATIONS = {
     'lLeg' : [[500, "0 0 5"], [500, "0 0 -5"]],
     'rLeg' : [[500, " 0 0 -5"], [500, "0 0 5"]],
 
-  }
+  },
+
+  'jump' : {
+    'lLeg' : [[1000, "30 0 0"], [200, "-30 0 0"], [1000, "0 0 0"]],
+    'rLeg' : [[1000, " 30 0 0"], [200, "-30 0 0"], [1000, "0 0 0"]],
+    'lArm' : [[1000, " 50 0 30"], [200, "-80 0 30"], [1000, "0 0 30"]],
+    'rArm' : [[1000, " 50 0 -30"], [200, "-80 0 -30"], [1000, "0 0 -30"]],
+  },
 
 };
 
@@ -222,7 +229,8 @@ AFRAME.registerComponent('numberblock', {
     }
 
     this.callbacks = {
-      'stopMovement' : this.stopMovement.bind(this)
+      'stopMovement' : this.stopMovement.bind(this),
+      'jumpUp' : this.jumpUp.bind(this)
     };
 
     this.el.addEventListener('grab-start', this.listeners.grabStart);
@@ -315,6 +323,14 @@ AFRAME.registerComponent('numberblock', {
        this.addKeyFrames(animData, "floss")
        break;
 
+      case "jump":
+        var animData = {
+          'easing': "easeInOutQuad",
+          'repeat' : false,
+          'replace' : true
+        }
+        this.addKeyFrames(animData, "jump")
+        break;
 
      default:
        console.log("Unexpected action: " + action);
@@ -365,25 +381,40 @@ AFRAME.registerComponent('numberblock', {
     ["lLeg","rLeg","lArm","rArm","body","box"].forEach((part) => {
 
       animData.replace = replace;
-
-      ANIMATIONS[action][part].forEach((keyFrame) => {
-        animData['msecs'] = keyFrame[0];
-        animData['rotation'] = keyFrame[1];
-        this[part].emit("addKeyFrame", animData, false);
-        animData.replace = false;
-      });
+      if (ANIMATIONS[action][part]) {
+        ANIMATIONS[action][part].forEach((keyFrame) => {
+          animData['msecs'] = keyFrame[0];
+          animData['rotation'] = keyFrame[1];
+          this[part].emit("addKeyFrame", animData, false);
+          animData.replace = false;
+        });
+      }
     });
   },
 
   tick: function (time, timeDelta) {
 
+    // 0.0825 is the halfHeight of the character.  0.002 is the tolerance.
     this.state.grounded = this.isSupportedBelow(0.0825, 0.002);
+
+    this.state.upright = this.isUpright(0.5);  // 0.5 rad is about 29 degrees.
 
     if (((time % 5000) < ((time - timeDelta) % 5000)) &&
         (!this.state.grabbed))
      {
       // every 5 seconds.
-      this.performRandomAction()
+
+      if (this.state.upright && this.state.grounded) {
+        // standing on the ground
+        this.performRandomAction()
+      }
+      else if (!this.state.upright)
+      {
+        // Probably lying on the ground.
+        // note that "grounded" is determined by what is below the
+        // feet, so ignore "grounded" when not upright.
+        this.jumpUpFromGround();
+      }
     }
 
     if (this.data.debug && this.debugLogger) {
@@ -397,10 +428,39 @@ AFRAME.registerComponent('numberblock', {
     }
   },
 
-  /* Method used here comes from:
+  isUpright: (function(tolerance) {
+
+   var vector = new THREE.Vector3();
+   var spherical = new THREE.Spherical();
+
+   return function(tolerance) {
+
+     var upright = false;
+     vector.set(0, 1, 0);
+     vector.applyQuaternion(this.el.object3D.quaternion);
+     spherical.setFromVector3(vector);
+
+     if (Math.abs(spherical.phi) < tolerance) {
+       upright = true;
+     }
+
+     return(upright);
+   }
+ })(),
+
+  /* Determine whether the object has a supporting object immediately below.
+     Note, "below" means under its feet, so a freefalling upside down object
+     with another object immediately above it would come out as "Supported"
+     (but would not be marked as upright!)
+     Method used here comes from:
      https://gamedev.stackexchange.com/questions/58012/detect-when-a-bullet-rigidbody-is-on-ground
      Modified to allow for the body not being vertical */
   isSupportedBelow: function(myHeight, sensitivity) {
+
+    if (!Ammo.asm.$) {
+      // physics engine not activated yet.
+      return true;
+    }
 
     var onGround = false;
     // Create a ray to check for a colliding object.
@@ -429,13 +489,40 @@ AFRAME.registerComponent('numberblock', {
         onGround = true;
     }
 
+    Ammo.destroy(btFrom);
+    Ammo.destroy(btTo);
+    Ammo.destroy(res);
+
     return (onGround);
+  },
+
+  jumpUpFromGround: function() {
+
+    // swing arms and legs.
+    this.setLimbsAnimation("jump");
+
+    // After 1000 msecs...
+    setTimeout(this.callbacks.jumpUp, 1000)
+
+  },
+
+  jumpUp: function() {
+
+    // jump up to a horizontal position
+    this.el.setAttribute("db-rotation",
+                         {'x': 0, 'z': 0});
+
+    // with an initial upwards kick (not sustained, and soon reversed by gravity).
+    const velocity = new Ammo.btVector3(0, 10, 0);
+    this.el.body.setLinearVelocity(this.velocity);
+    Ammo.destroy(velocity);
   },
 
   performRandomAction: function() {
 
     var choice = Math.floor(Math.random() * 5);
     var action = ACTIONS[choice];
+
 
 
     switch (action) {
