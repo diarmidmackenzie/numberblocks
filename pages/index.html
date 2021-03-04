@@ -39,7 +39,7 @@
                    Press 7 then + to Grip (+ again to un-grip)\n
                    Also, use 4/5/6 to rotate controller around x/y/z axes."
                    position="-7 1 -5" color="grey"></a-text>
-    <a-camera position="0 1.6 0" look-controls>
+    <a-camera id="camera" position="0 1.6 0" look-controls>
       <a-text id="log-panel1" wrapCount=80 width="1" value="L Hand Keyboard Sim Data" position="-1 0 -1.5" color="grey"></a-text>
       <a-text id="log-panel2" wrapCount=80 width="1" value="R Hand Keyboard Data" position="0 0 -1.5" color="grey"></a-text>
     </a-camera>
@@ -123,7 +123,7 @@
           ammo-shape="type: box; fit:manual;halfExtents:0.05 0.0825 0.05"
           keyframe-animation
           position = "0 1.01575 -1"
-          numberblock
+          numberblock="debug:true"
           grabbable="constraintComponentName: ammo-constraint">
   <a-entity id = "oneBody" keyframe-animation>
   <a-box id = "oneBox" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" keyframe-animation position="0 0.0375 0">
@@ -178,6 +178,5 @@
 </a-box>
 
 </a-scene>
-
 
 </body>

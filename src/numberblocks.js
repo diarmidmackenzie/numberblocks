@@ -178,11 +178,20 @@ const ANIMATIONS = {
 
 AFRAME.registerComponent('numberblock', {
 
+  scheme: {
+    'debug': {type: 'boolean', default: false}
+  },
+
   init: function() {
     //this.tick = AFRAME.utils.throttleTick(this.tick, 5000, this);
     this.animCount = 0;
-    this.grabbed = false;
-    this.currentBehaviour = "";
+
+    this.state = {
+     'grabbed' : false,
+     'currentBehaviour' : "",
+     'upright' : true,
+     'grounded' : true
+    }
 
     this.lLeg = document.querySelector("#oneLLeg");
     this.rLeg = document.querySelector("#oneRLeg");
@@ -203,6 +212,8 @@ AFRAME.registerComponent('numberblock', {
       // cache the ammo-body component
       this.ammo = this.el.components["ammo-body"];
 
+      // get started with moving
+      this.performRandomAction()
     });
 
     this.listeners = {
@@ -218,28 +229,42 @@ AFRAME.registerComponent('numberblock', {
     this.el.addEventListener('grab-end', this.listeners.grabEnd);
   },
 
+  update: function() {
+
+    if (this.data.debug  && !this.debugLogger) {
+      this.debugLogger = document.createElement('a-plane');
+      this.debugLogger.object3D.position.set(0, 0.3, 0)
+      this.debugLogger.setAttribute("width", 0.4);
+      this.debugLogger.setAttribute("height", 0.4);
+      this.debugLogger.setAttribute("material", "color:black; transparent: true; opacity: 0.7");
+      this.debugLogger.setAttribute("text", "color:white;side:double;wrapCount: 20");
+      this.debugLogger.setAttribute("rotate-to-face-player", "camera:#camera; parent:#oneEntity");
+      this.el.appendChild(this.debugLogger);
+    }
+  },
+
   grabStart: function () {
     console.log("Grab start")
-    this.grabbed = true;
+    this.state.grabbed = true;
     this.setLimbsAnimation("panic");
   },
 
   grabEnd: function () {
     console.log("Grab end")
-    this.grabbed = false;
+    this.state.grabbed = false;
     this.setLimbsAnimation("stop");
   },
 
   setLimbsAnimation: function (action) {
 
     // Of the available behaviours, only "wave" is not on repeat...
-    if ((action == this.currentBehaviour) &&
+    if ((action == this.state.currentBehaviour) &&
         (action !== "wave")) {
           return;
       }
 
     console.log("Requested action: " + action);
-    this.currentBehaviour = action;
+    this.state.currentBehaviour = action;
 
     switch (action) {
       case "walk":
@@ -351,13 +376,60 @@ AFRAME.registerComponent('numberblock', {
   },
 
   tick: function (time, timeDelta) {
-    
+
+    this.state.grounded = this.isSupportedBelow(0.0825, 0.002);
+
     if (((time % 5000) < ((time - timeDelta) % 5000)) &&
-        (!this.grabbed))
+        (!this.state.grabbed))
      {
       // every 5 seconds.
       this.performRandomAction()
     }
+
+    if (this.data.debug && this.debugLogger) {
+
+      this.debugLogger.setAttribute("text",
+                            `value: grabbed : ${this.state.grabbed}\n
+                             currentBehaviour : ${this.state.currentBehaviour}\n
+                             upright :  ${this.state.upright}\n
+                             grounded :  ${this.state.grounded}\n`);
+
+    }
+  },
+
+  /* Method used here comes from:
+     https://gamedev.stackexchange.com/questions/58012/detect-when-a-bullet-rigidbody-is-on-ground
+     Modified to allow for the body not being vertical */
+  isSupportedBelow: function(myHeight, sensitivity) {
+
+    var onGround = false;
+    // Create a ray to check for a colliding object.
+    // From point is the object center.
+    const btFrom = new Ammo.btVector3(this.el.object3D.position.x,
+                                      this.el.object3D.position.y,
+                                      this.el.object3D.position.z);
+
+    // To point depends on the objects orientation.
+    // In the default orientation, it is straight down.
+    var toVector = new THREE.Vector3(0, -1, 0);
+    toVector.applyQuaternion(this.el.object3D.quaternion);
+    toVector.add(this.el.object3D.position);
+
+    const btTo = new Ammo.btVector3(toVector.x,
+                                    toVector.y,
+                                    toVector.z);
+
+    var res = new Ammo.ClosestRayResultCallback(btFrom, btTo);
+
+    this.ammo.system.driver.physicsWorld.rayTest(btFrom, btTo, res);
+
+    if(res.hasHit()){
+      const distance = this.el.object3D.position.y - res.get_m_hitPointWorld().y();
+      if (distance < myHeight + sensitivity)
+        onGround = true;
+    }
+
+    return (onGround);
   },
 
   performRandomAction: function() {
@@ -919,4 +991,46 @@ AFRAME.registerComponent('db-position', {
                             'maxAcceleration': data.maxAcceleration,
                             'angular': true});
     }
+});
+
+// This component only works for elements in the world reference.
+// Only affects rotation about y axis, not x & z.
+AFRAME.registerComponent('rotate-to-face-player', {
+
+  schema : {
+    camera: {type: 'selector', default: "#camera"}
+  },
+
+  tick: function() {
+    this.trackCamera();
+  },
+
+  trackCamera: (function() {
+
+    var vectorToCamera = new THREE.Vector3();
+    var cylindrical = new THREE.Cylindrical();
+    var quaternion = new THREE.Quaternion();
+    var position = new THREE.Vector3();
+
+    return function() {
+      // Get Camera World Position.
+      var camera = this.data.camera;
+      camera.object3D.updateMatrixWorld();
+      vectorToCamera.setFromMatrixPosition(camera.object3D.matrixWorld);
+
+      // and object world position - and the vector between them.
+      this.el.object3D.getWorldPosition(position);
+      vectorToCamera.sub(position);
+
+      // Factor in rotation of parent to get a rotation in the object's own space.
+      this.el.object3D.parent.getWorldQuaternion(quaternion);
+      quaternion.invert();
+      vectorToCamera.applyQuaternion(quaternion);
+
+      // Determine angle to camera, and set this rotation on the object.
+      cylindrical.setFromVector3(vectorToCamera);
+      this.el.object3D.rotation.y = cylindrical.theta;
+
+    }
+  })()
 });
