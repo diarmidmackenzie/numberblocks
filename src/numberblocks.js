@@ -351,17 +351,20 @@ AFRAME.registerComponent('numberblock', {
   },
 
   tick: function (time, timeDelta) {
-
-    var action = "";
-
+    
     if (((time % 5000) < ((time - timeDelta) % 5000)) &&
         (!this.grabbed))
      {
       // every 5 seconds.
-
-      var choice = Math.floor(Math.random() * 5);
-      action = ACTIONS[choice];
+      this.performRandomAction()
     }
+  },
+
+  performRandomAction: function() {
+
+    var choice = Math.floor(Math.random() * 5);
+    var action = ACTIONS[choice];
+
 
     switch (action) {
 
