@@ -121,16 +121,14 @@
 <a-entity id = "oneEntity"
           ammo-body="type: dynamic"
           ammo-shape="type: box; fit:manual;halfExtents:0.05 0.0825 0.05"
-          keyframe-animation
           position = "0 1.01575 -1"
           rotation = "0 0 0"
           numberblock="debug:true"
           grabbable="constraintComponentName: ammo-constraint">
-  <a-entity id = "oneBody" keyframe-animation>
-  <a-box id = "oneBox" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" keyframe-animation position="0 0.0375 0">
+  <a-entity id = "oneBody">
+  <a-box id = "oneBox" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" position="0 0.0375 0">
 
     <a-entity gltf-model="#face1"
-              keyframe-animation
               scale="0.05 0.05 0.05"
               position="0 0 0.05">
     </a-entity>
@@ -138,30 +136,26 @@
 
   <a-entity id = "oneLArm" gltf-model="#limb1"
             scale="0.05 0.05 0.05"
-            keyframe-animation
             position="0.05 0.0375 0"
             rotation="0 0 30">
   </a-entity>
   <a-entity id = "oneRArm" gltf-model="#limb1"
-            keyframe-animation
             scale="0.05 0.05 0.05"
             position="-0.05 0.0375 0"
             rotation="0 0 -30">
   </a-entity>
+  </a-entity>
   <a-entity id = "oneLLeg" gltf-model="#limb1"
-            keyframe-animation
             scale="0.05 0.05 0.05"
             position="0.02 -0.0075 0"
             rotation="0 0 0">
   </a-entity>
   <a-entity id = "oneRLeg" gltf-model="#limb1"
-            keyframe-animation
             scale="0.05 0.05 0.05"
             position="-0.02 -0.0075 0"
             rotation="0 0 0">
   </a-entity>
 
-</a-entity>
 
 </a-entity>
 

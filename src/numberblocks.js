@@ -113,7 +113,12 @@ AFRAME.registerComponent('ammo-phase-shift', {
   }
 });
 
-const ACTIONS = ["walk", "look", "wave", "turn", "floss", "stop", "turn", "jump"];
+// Actions map directly to animations.
+const ACTIONS = ["walk", "panic", "wave", "stop", "floss", "turn", "jump", "look"];
+// Behaviours are what the numberblock chooses from, when stable & grounded.
+const BEHAVIOURS = ["walk", "look", "wave", "turn", "floss"]
+const PARTS = ["lLeg", "rLeg", "lArm", "rArm", "body", "box"];
+const PROPERTIES = ["rotation", "position"];
 
 const ANIMATIONS = {
 /*  'walk' : {
@@ -123,63 +128,90 @@ const ANIMATIONS = {
     'rArm' : "property: rotation; from:30 0 -30; to: -30 0 -30; loop: true;  dir: alternate; easing:easeInOutQuad; dur: 500",
 */
   'walk' : {
-    'lLeg' : [[500, "-20 0 0"], [500, " 20 0 0"]],
-    'rLeg' : [[500, " 20 0 0"], [500, "-20 0 0"]],
-    'lArm' : [[500, " 30 0 30"], [500, "-30 0 30"]],
-    'rArm' : [[500, " -30 0 -30"], [500, "30 0 -30"]],
-    'body' : [[500, " 0 0 0"]],
-    'box' : [[500, " 0 0 0"]]
+    'rotation': {
+      'lLeg' : [[500, "-20 0 0"], [500, " 20 0 0"]],
+      'rLeg' : [[500, " 20 0 0"], [500, "-20 0 0"]],
+      'lArm' : [[500, " 30 0 30"], [500, "-30 0 30"]],
+      'rArm' : [[500, " -30 0 -30"], [500, "30 0 -30"]],
+      'body' : [[500, " 0 0 0"]],
+      'box' : [[500, " 0 0 0"]]
+    }
   },
 
   'panic' : {
-    'lLeg' : [[80, "0 0 -10"], [80, " 0 0 5"]],
-    'rLeg' : [[80, " 0 0 5"], [80, "0 0 -10"]],
-    'lArm' : [[80, " 0 0 50"], [80, "0 0 10"]],
-    'rArm' : [[80, " 0 0 -10"], [80, "0 0 -50"]],
-    'body' : [[500, " 0 0 0"]],
-    'box' : [[500, " 0 0 0"]]
+    'rotation': {
+      'lLeg' : [[80, "0 0 -10"], [80, " 0 0 5"]],
+      'rLeg' : [[80, " 0 0 5"], [80, "0 0 -10"]],
+      'lArm' : [[80, " 0 0 50"], [80, "0 0 10"]],
+      'rArm' : [[80, " 0 0 -10"], [80, "0 0 -50"]],
+      'body' : [[500, " 0 0 0"]],
+      'box' : [[500, " 0 0 0"]]
+    }
   },
 
   'wave' : {
-    'lLeg' : [[500, "0 0 0"], [2000, " 0 0 0"]],
-    'rLeg' : [[500, " 0 0 0"], [2000, "0 0 0"]],
-    'lArm' : [[500, " 0 0 30"], [2000, "0 0 30"]],
-    'rArm' : [[500, " 0 0 -30"], [500, "0 0 -150"], [500, "0 0 -120"], [500, "0 0 -150"], [500, "0 0 -30"]],
-    'body' : [[500, " 0 0 0"]],
-    'box'  : [[500, " -20 0 0"], [1000, "-20 0 0"], [1000, "-20 0 0"], [500, "0 0 0"]]
-
+    'rotation': {
+      'lLeg' : [[500, "0 0 0"], [2000, " 0 0 0"]],
+      'rLeg' : [[500, " 0 0 0"], [2000, "0 0 0"]],
+      'lArm' : [[500, " 0 0 30"], [2000, "0 0 30"]],
+      'rArm' : [[500, " 0 0 -30"], [500, "0 0 -150"], [500, "0 0 -120"], [500, "0 0 -150"], [500, "0 0 -30"]],
+      'body' : [[500, " 0 0 0"]],
+      'box'  : [[500, " -20 0 0"], [1000, "-20 0 0"], [1000, "-20 0 0"], [500, "0 0 0"]]
+    }
   },
 
   'stop' : {
-    'lLeg' : [[500, "0 0 0"]],
-    'rLeg' : [[500, " 0 0 0"]],
-    'lArm' : [[500, " 0 0 30"]],
-    'rArm' : [[500, " 0 0 -30"]],
-    'body' : [[500, " 0 0 0"]],
-    'box'  : [[500, " 0 0 0"]]
+    'rotation': {
+      'lLeg' : [[500, "0 0 0"]],
+      'rLeg' : [[500, " 0 0 0"]],
+      'lArm' : [[500, " 0 0 30"]],
+      'rArm' : [[500, " 0 0 -30"]],
+      'body' : [[500, " 0 0 0"]],
+      'box'  : [[500, " 0 0 0"]]
+    },
+    'position': {
+      'lLeg' : [[500, "0.02 -0.0075 0"]],
+      'rLeg' : [[500, "-0.02 -0.0075 0"]],
+    }
   },
 
   'floss' : {
-    'lLeg' : [[315, "0 0 -10"], [315, "0 0 10"],[315, "0 0 -10"], [315, "0 0 10"]],
-    'rLeg' : [[315, " 0 0 -10"], [315, "0 0 10"],[315, " 0 0 -10"], [315, "0 0 10"]],
-    'lArm' : [[315, " 30 0 5"], [315, " -30 0 80"], [315, " -30 0 5"], [315, " 30 0 80"]],
-    'rArm' : [[315, " 30 0 -80"], [315, " -30 0 -5"], [315, " -30 0 -80"], [315, "30 0 -5"]],
-    'body' : [[315, " 0 0 10"], [315, " 0 0 -10"], [315, " 0 0 10"], [315, "0 0 -10"]],
-    'box' : [[315, "0 0 0"]]
+    'rotation': {
+      'lLeg' : [[315, "0 0 -10"], [315, "0 0 10"],[315, "0 0 -10"], [315, "0 0 10"]],
+      'rLeg' : [[315, " 0 0 -10"], [315, "0 0 10"],[315, " 0 0 -10"], [315, "0 0 10"]],
+      'lArm' : [[315, " 30 0 5"], [315, " -30 0 80"], [315, " -30 0 5"], [315, " 30 0 80"]],
+      'rArm' : [[315, " 30 0 -80"], [315, " -30 0 -5"], [315, " -30 0 -80"], [315, "30 0 -5"]],
+      'body' : [[315, " 0 0 10"], [315, " 0 0 -10"], [315, " 0 0 10"], [315, "0 0 -10"]],
+      'box' : [[315, "0 0 0"]]
+    },
+    'position': {
+      'lLeg' : [[315, "0.03 -0.0075 0"], [315, "0.01 -0.0075 0"]],
+      'rLeg' : [[315, "-0.01 -0.0075 0"], [315, "-0.03 -0.0075 0"]],
+    }
   },
 
   'turn' : {
-    'lLeg' : [[500, "0 0 5"], [500, "0 0 -5"]],
-    'rLeg' : [[500, " 0 0 -5"], [500, "0 0 5"]],
-
+    'rotation': {
+      'lLeg' : [[500, "0 0 5"], [500, "0 0 -5"]],
+      'rLeg' : [[500, " 0 0 -5"], [500, "0 0 5"]],
+    }
   },
 
   'jump' : {
-    'lLeg' : [[1000, "30 0 0"], [200, "-30 0 0"], [1000, "0 0 0"]],
-    'rLeg' : [[1000, " 30 0 0"], [200, "-30 0 0"], [1000, "0 0 0"]],
-    'lArm' : [[1000, " 50 0 30"], [200, "-80 0 30"], [1000, "0 0 30"]],
-    'rArm' : [[1000, " 50 0 -30"], [200, "-80 0 -30"], [1000, "0 0 -30"]],
+    'rotation': {
+      'lLeg' : [[1000, "30 0 0"], [200, "-30 0 0"], [1000, "0 0 0"]],
+      'rLeg' : [[1000, " 30 0 0"], [200, "-30 0 0"], [1000, "0 0 0"]],
+      'lArm' : [[1000, " 80 0 30"], [200, "-80 0 30"], [1000, "0 0 30"]],
+      'rArm' : [[1000, " 80 0 -30"], [200, "-80 0 -30"], [1000, "0 0 -30"]],
+    }
   },
+
+  'look' : {
+    'rotation': {
+      'body' : [[500, "0 20 0"], [500, "0 -20 0"], [1000, "0 0 0"]]
+    }
+  },
+
 
 };
 
@@ -226,6 +258,7 @@ AFRAME.registerComponent('numberblock', {
     this.listeners = {
       'grabStart': this.grabStart.bind(this),
       'grabEnd': this.grabEnd.bind(this),
+      'animationComplete': this.animationComplete.bind(this)
     }
 
     this.callbacks = {
@@ -235,10 +268,11 @@ AFRAME.registerComponent('numberblock', {
 
     this.el.addEventListener('grab-start', this.listeners.grabStart);
     this.el.addEventListener('grab-end', this.listeners.grabEnd);
+
+    this.createAnimations();
   },
 
   update: function() {
-
     if (this.data.debug  && !this.debugLogger) {
       this.debugLogger = document.createElement('a-plane');
       this.debugLogger.object3D.position.set(0, 0.3, 0)
@@ -251,153 +285,114 @@ AFRAME.registerComponent('numberblock', {
     }
   },
 
+  /* ANIMATION FUNCTIONALITY */
+
+  // We create all animations on the object at start of day, and then trigger
+  // them using events.
+  createAnimations: function() {
+
+    ACTIONS.forEach((action) => {
+      PROPERTIES.forEach((property) => {
+        if (ANIMATIONS[action][property]) {
+          PARTS.forEach((part) => {
+            if (ANIMATIONS[action][property][part]) {
+              ANIMATIONS[action][property][part].forEach((keyFrame, index) => {
+                this.addKeyFrameAnimation(part, action, property, index);
+              });
+            }
+          });
+        }
+      });
+    });
+  },
+
+  addKeyFrameAnimation: function(part, action, property, index) {
+
+    const target = this[part];
+    const attribName = `animation__${action}_${part}_${property}_${index}`
+    const attribObject = {'property': property,
+                          'to': ANIMATIONS[action][property][part][index][1],
+                          'easing': "easeInOutQuad",
+                          'dur': ANIMATIONS[action][property][part][index][0],
+                          'autostart': false,
+                          'startEvents': `start-anim-${action}_${part}_${property}_${index}`};
+    this[part].setAttribute(attribName, attribObject);
+
+    this[part].addEventListener(`animationcomplete__${action}_${part}_${property}_${index}`, this.listeners.animationComplete);
+
+  },
+
+  startAnimation: function(action) {
+
+    // Never override panic action on a grabbed entity
+    // (this path can happen due to timers popping after the grab)
+    if (this.grabbed) {
+      action = "panic";
+    }
+
+    if (this.state.currentBehaviour == action) {
+      // already doing this animation.
+      return;
+    }
+
+    this.state.currentBehaviour = action;
+
+    PARTS.forEach((part) => {
+      PROPERTIES.forEach((property) => {
+        this.startPartPropertyAnimation(part, action, property, 0);
+      });
+    });
+  },
+
+  startPartPropertyAnimation: function(part, action, property, index) {
+
+    this[part].emit(`start-anim-${action}_${part}_${property}_${index}`, false);
+  },
+
+  animationComplete: function(event) {
+
+    // "animation__" is 11 characters.
+    const animData = event.detail.name.substr(11).split("_")
+    const action = animData[0]
+    const part = animData[1]
+    const property = animData[2]
+    var index = parseInt(animData[3]);
+
+    index++;
+    if (index >= ANIMATIONS[action][property][part].length) {
+      index = 0;
+    }
+
+    // continue with this animation?
+    if (this.state.currentBehaviour == action) {
+      this.startPartPropertyAnimation(part, action, property, index);
+    }
+  },
+
+  /* BEHAVIOUR FUNCTIONALITY */
+
   grabStart: function () {
     console.log("Grab start")
     this.state.grabbed = true;
-    this.setLimbsAnimation("panic");
+    this.startAnimation("panic");
   },
 
   grabEnd: function () {
     console.log("Grab end")
     this.state.grabbed = false;
-    this.setLimbsAnimation("stop");
-  },
-
-  setLimbsAnimation: function (action) {
-
-    // Of the available behaviours, only "wave" is not on repeat...
-    if ((action == this.state.currentBehaviour) &&
-        (action !== "wave")) {
-          return;
-      }
-
-    console.log("Requested action: " + action);
-    this.state.currentBehaviour = action;
-
-    switch (action) {
-      case "walk":
-
-        animData = {
-          'easing': "easeInOutQuad",
-          'repeat' : true,
-          'replace' : true
-        }
-
-        this.addKeyFrames(animData, "walk")
-        break;
-
-      case "panic":
-        var animData = {
-          'easing': "easeInOutQuad",
-          'repeat' : true,
-          'replace' : true
-        }
-
-        this.addKeyFrames(animData, "panic")
-        break;
-
-      case "wave":
-        var animData = {
-          'easing': "easeInOutQuad",
-          'repeat' : false,
-          'replace' : true
-        }
-        this.addKeyFrames(animData, "wave")
-        break;
-
-     case "stop":
-       animData = {
-         'easing': "easeInOutQuad",
-         'repeat' : false,
-         'replace' : true
-       }
-       this.addKeyFrames(animData, "stop")
-       break;
-
-     case "floss":
-       var animData = {
-         'easing': "easeInOutQuad",
-         'repeat' : true,
-         'replace' : true
-       }
-       this.addKeyFrames(animData, "floss")
-       break;
-
-      case "jump":
-        var animData = {
-          'easing': "easeInOutQuad",
-          'repeat' : false,
-          'replace' : true
-        }
-        this.addKeyFrames(animData, "jump")
-        break;
-
-     default:
-       console.log("Unexpected action: " + action);
-    }
+    this.startAnimation("stop");
   },
 
   stopMovement: function () {
-    this.setLimbsAnimation("stop");
+    this.startAnimation("stop");
     this.el.removeAttribute("db-rotation");
     this.el.removeAttribute("db-velocity__vel");
     this.el.removeAttribute("db-velocity__angvel");
   },
 
-  lookLandR: function() {
-
-    // This can (and should) probably be refactored into table data like other
-    // movements are...
-    var animData = {
-      'msecs': 500,
-      'easing': "easeInOutQuad",
-      'repeat' : false,
-      'replace' : false,
-      'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI + 20} 0`
-    }
-    this.whole.emit("addKeyFrame", animData, false);
-    animData = {
-      'msecs': 500,
-      'easing': "easeInOutQuad",
-      'repeat' : false,
-      'replace' : false,
-      'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI - 20} 0`
-    }
-    this.whole.emit("addKeyFrame", animData, false);
-
-    animData = {
-      'msecs': 500,
-      'easing': "easeInOutQuad",
-      'repeat' : false,
-      'replace' : false,
-      'rotation': `0 ${this.whole.object3D.rotation.y * 180 / Math.PI} 0`
-    }
-    this.whole.emit("addKeyFrame", animData, false);
-  },
-
-  addKeyFrames: function(animData, action) {
-
-    var replace = animData.replace;
-    ["lLeg","rLeg","lArm","rArm","body","box"].forEach((part) => {
-
-      animData.replace = replace;
-      if (ANIMATIONS[action][part]) {
-        ANIMATIONS[action][part].forEach((keyFrame) => {
-          animData['msecs'] = keyFrame[0];
-          animData['rotation'] = keyFrame[1];
-          this[part].emit("addKeyFrame", animData, false);
-          animData.replace = false;
-        });
-      }
-    });
-  },
-
   tick: function (time, timeDelta) {
 
-    // 0.0825 is the halfHeight of the character.  0.002 is the tolerance.
-    this.state.grounded = this.isSupportedBelow(0.0825, 0.002);
-
-    this.state.upright = this.isUpright(0.5);  // 0.5 rad is about 29 degrees.
+    this.syncStateFromPosition();
 
     if (((time % 5000) < ((time - timeDelta) % 5000)) &&
         (!this.state.grabbed))
@@ -426,6 +421,96 @@ AFRAME.registerComponent('numberblock', {
                              grounded :  ${this.state.grounded}\n`);
 
     }
+  },
+
+  jumpUpFromGround: function() {
+
+    // swing arms and legs.
+    this.startAnimation("jump");
+
+    // After 1000 msecs...
+    setTimeout(this.callbacks.jumpUp, 1000)
+
+  },
+
+  jumpUp: function() {
+
+    // jump up to a horizontal position
+    this.el.setAttribute("db-rotation",
+                         {'x': 0, 'z': 0});
+
+    // with an initial upwards kick (not sustained, and soon reversed by gravity).
+    const velocity = new Ammo.btVector3(0, 10, 0);
+    this.el.body.setLinearVelocity(this.velocity);
+    Ammo.destroy(velocity);
+
+    // Stop movement so we don't repeat the jump animation.
+    setTimeout(this.callbacks.stopMovement, 500);
+  },
+
+  performRandomAction: function() {
+
+    var choice = Math.floor(Math.random() * 5);
+    var action = BEHAVIOURS[choice];
+
+    switch (action) {
+
+      case "walk":
+        this.startAnimation("walk");
+        var angle = Math.random() * Math.PI * 2;
+        var x = 0.3 * Math.sin(angle);
+        var z = 0.3 * Math.cos(angle);
+
+        this.el.setAttribute("db-rotation",
+                            {'y': (angle * 180 / Math.PI)});
+        this.el.setAttribute("db-velocity__vel",
+                            {'x': x, 'z': z});
+        setTimeout(this.callbacks.stopMovement, Math.random() * 1000 + 1000)
+
+        break;
+
+      case "look":
+        this.startAnimation("stop");
+        this.startAnimation("look");
+        setTimeout(this.callbacks.stopMovement, 1000);
+        break;
+
+      case "wave":
+        this.startAnimation("wave");
+        // Only wave once.
+        setTimeout(this.callbacks.stopMovement, 2000)
+        break;
+
+      case "turn":
+        // Turning for a random period up to 2 seconds.
+        this.startAnimation("turn");
+        this.el.setAttribute("db-velocity__angvel",
+                             {'y': 5 * Math.sign(Math.random() - 0.5),
+                              'angular': true,
+                              maxAcceleration: 500});
+        setTimeout(this.callbacks.stopMovement, Math.random() * 2000)
+
+        // Note this doesn't affect any existing body/limb animations, which can
+        // continue along with the turn.
+        break;
+
+      case "floss":
+        this.startAnimation("floss");
+        break;
+
+      default:
+        break;
+    }
+  },
+
+  /* PHYSICS-RELATED FUNCTION */
+
+  syncStateFromPosition: function () {
+
+    // 0.0825 is the halfHeight of the character.  0.002 is the tolerance.
+    this.state.grounded = this.isSupportedBelow(0.0825, 0.002);
+    this.state.upright = this.isUpright(0.5);  // 0.5 rad is about 29 degrees.
+
   },
 
   isUpright: (function(tolerance) {
@@ -494,292 +579,8 @@ AFRAME.registerComponent('numberblock', {
     Ammo.destroy(res);
 
     return (onGround);
-  },
-
-  jumpUpFromGround: function() {
-
-    // swing arms and legs.
-    this.setLimbsAnimation("jump");
-
-    // After 1000 msecs...
-    setTimeout(this.callbacks.jumpUp, 1000)
-
-  },
-
-  jumpUp: function() {
-
-    // jump up to a horizontal position
-    this.el.setAttribute("db-rotation",
-                         {'x': 0, 'z': 0});
-
-    // with an initial upwards kick (not sustained, and soon reversed by gravity).
-    const velocity = new Ammo.btVector3(0, 10, 0);
-    this.el.body.setLinearVelocity(this.velocity);
-    Ammo.destroy(velocity);
-  },
-
-  performRandomAction: function() {
-
-    var choice = Math.floor(Math.random() * 5);
-    var action = ACTIONS[choice];
-
-
-
-    switch (action) {
-
-      case "walk":
-        this.setLimbsAnimation("walk");
-        var angle = Math.random() * Math.PI * 2;
-        var x = 0.3 * Math.sin(angle);
-        var z = 0.3 * Math.cos(angle);
-
-        this.el.setAttribute("db-rotation",
-                            {'y': (angle * 180 / Math.PI)});
-        this.el.setAttribute("db-velocity__vel",
-                            {'x': x, 'z': z});
-        setTimeout(this.callbacks.stopMovement, Math.random() * 1000 + 1000)
-
-        //this.walkTo(this.targetPosition);
-        break;
-
-      case "look":
-        this.setLimbsAnimation("stop");
-        this.lookLandR();
-        break;
-
-      case "wave":
-        this.setLimbsAnimation("wave");
-        break;
-
-      case "turn":
-        this.setLimbsAnimation("turn");
-        this.el.setAttribute("db-velocity__angvel",
-                             {'y': 5 * Math.sign(Math.random() - 0.5),
-                              'angular': true,
-                              maxAcceleration: 500});
-        setTimeout(this.callbacks.stopMovement, Math.random() * 1000)
-
-        // Note this doesn't affect any existing body/limb animations, which can
-        // continue along with the turn.
-        break;
-
-      case "floss":
-        this.setLimbsAnimation("floss");
-        break;
-
-      case "stop":
-        this.setLimbsAnimation("stop");
-        break;
-
-      default:
-        break;
-    }
   }
 });
-
-
-AFRAME.registerComponent('keyframe-animation', {
-
-  init: function() {
-
-    this.time = 0;
-    this.animEndTime = 0;
-    this.keyFrames = [];
-    this.listeners = {
-      addKeyFrame: this.addKeyFrame.bind(this),
-      animationComplete: this.animationComplete.bind(this)
-    }
-
-    this.animCount = 0;
-
-    this.attachEventListeners();
-  },
-
-  attachEventListeners: function () {
-
-    this.el.addEventListener('addKeyFrame', this.listeners.addKeyFrame, false);
-    this.el.addEventListener('animationcomplete__rotation', this.listeners.animationComplete, false);
-    this.el.addEventListener('animationcomplete__position', this.listeners.animationComplete, false);
-    this.el.addEventListener('animationcomplete__scale', this.listeners.animationComplete, false);
-  },
-
-  addKeyFrame: function(event) {
-
-    var keyFrame = {
-      'position' : event.detail.position,
-      'rotation' : event.detail.rotation,
-      'scale' : event.detail.scale,
-      'msecs': event.detail.msecs,
-      'easing': event.detail.easing,
-      'repeat' : event.detail.repeat
-    }
-
-    if (event.detail.replace) {
-      this.keyFrames = [];
-    }
-
-    this.keyFrames.push(keyFrame);
-
-    //console.log("KeyFrames: " + this.keyFrames.length);
-
-  },
-
-  animateToFirstKeyFrame: function() {
-
-    if (this.keyFrames.length <= 0) {
-      // No animations queued up.
-      return;
-    }
-
-    this.animCount = 0;
-    const keyFrame = this.keyFrames[0];
-
-    if (keyFrame.position != null) {
-      this.animateToKeyFrameComponent("position",
-                                      `${this.el.object3D.position.x}
-                                       ${this.el.object3D.position.y}
-                                       ${this.el.object3D.position.z}`,
-                                      keyFrame);
-      this.animCount++;
-      //console.log(`Anim Count (pos) Incremented on: ${this.el.id} at ${this.time}`);
-      this.animEndTime = Math.max(this.animEndTime, this.time + keyFrame.msecs);
-    }
-    if (keyFrame.rotation != null) {
-      this.animateToKeyFrameComponent("rotation",
-                                      `${this.el.object3D.rotation.x * 180 / Math.PI}
-                                       ${this.el.object3D.rotation.y * 180 / Math.PI}
-                                       ${this.el.object3D.rotation.z * 180 / Math.PI}`,
-                                       keyFrame);
-      this.animCount++;
-      //console.log(`Anim Count (rot) Incremented on: ${this.el.id} at ${this.time}`);
-      this.animEndTime = Math.max(this.animEndTime, this.time + keyFrame.msecs);
-    }
-    if (keyFrame.scale != null) {
-      this.animateToKeyFrameComponent("scale",
-                                      `${this.el.object3D.scale.x}
-                                       ${this.el.object3D.scale.y}
-                                       ${this.el.object3D.scale.z}`,
-                                        keyFrame);
-      this.animCount++;
-      //console.log(`Anim Count (sca) Incremented on: ${this.el.id} at  ${this.time}`);
-      this.animEndTime = Math.max(this.animEndTime, this.time + keyFrame.msecs);
-    }
-
-    // If the keyFrame is to be repeated, add it to the end of the list.
-    if (keyFrame.repeat) {
-      //console.log("Adding keyFrame to end of list")
-      this.keyFrames.push(keyFrame);
-    }
-
-    // Remove it from the start of the list (since it is now playing)
-    this.keyFrames.splice(0, 1);
-
-  },
-
-  animateToKeyFrameComponent: function(component, current, keyFrame) {
-
-    const target = keyFrame[component];
-    const attribName = `animation__${component}`
-    const attribString = `property: ${component};
-                          from: ${current};
-                          to: ${target};
-                          easing: ${keyFrame.easing};
-                          dur: ${keyFrame.msecs}`
-
-    //console.log(`Animation on ${this.el.id} set as follows...`)
-    //console.log(attribName);
-    //console.log(attribString);
-
-    // Remove animation attribute before setting it, as recommended workaround for
-    // https://github.com/aframevr/aframe/issues/4810 where identical
-    // animations can't be requested consecutively.
-    // for the moving-dynamic-body component (which takes care of physics sync)
-    // we need to ensure this is immediately next in the components call order
-    // so we add this atthe same time.
-    // (note this component does nothing for entities that have no physics
-    // dynamic-body component).
-    this.el.removeAttribute(attribName);
-    this.el.removeAttribute("moving-dynamic-body");
-    this.el.setAttribute(attribName, attribString);
-    this.el.setAttribute("moving-dynamic-body", "");
-
-  },
-
-  animationComplete: function() {
-
-    //console.log(`Anim Count Decremented on: ${this.el.id} at ${this.time}`);
-    this.animCount--;
-
-    if (this.animCount <= 0) {
-      this.animCount = 0;
-
-      // Completed all requested animations, so move on to the next.
-      this.animateToFirstKeyFrame();
-
-    }
-  },
-
-  tick: function(time, timeDelta) {
-
-    this.time = time;
-
-    if (this.animCount <= 0) {
-      // animation requested, but none playing.  Start the first.
-      this.animateToFirstKeyFrame();
-    }
-    else
-    {
-      if (this.animEndTime > this.time + 1000) {
-        // Failed to receive timely animation end event.
-        console.warn(`Animation End Event Lost!  Anim count: ${this.AnimCount}, object: ${this.el.id}`);
-        this.animCount = 0;
-      }
-    }
-  }
-});
-
-/* Animations design....
-
-Need concept of keyframes for e.g. waving.
-Only need rotation for limbs, and position & rotation for block itself.
-Also position for eyeball?
-Some animations repeat.  Others are one-time (e.g. get up, turn).
-
-For each component object...
-- Queue of animation key-frames to hit at particular times.
-- Step through them.
-- Queue can be flushed at any time.
-
-Behaviours... at number block level.
-- Defines a series of keyframes to hit, for each element.
-- Can set multiple in advance.
-- Can flush existing queue to make things happen instantly.
-
-Do continuing behaviours need to be implemented repeatedly, or can they program to
-loop?
-- Maybe: keyframes can be given a "repeat" or "discard" property.  Once expired
-  they then get added to the end of the queue (or not) automatically...
-
-So...
-
-"add-keyframe" event.
-With detail including:
-- position
-- rotation
-- scale
-- timeout to get there
-- add to end, or act immediately? (replace or concatenate)
-- repeat when expired, or discard?
-- easing?  E.g. jumping up from falling over should not happen linearly...
--- Could achieve with help of physics, and set the body velocity?  https://github.com/n5ro/aframe-physics-system/issues/124
-  https://github.com/n5ro/aframe-physics-system/issues/124
-
-keyframe-animation component...
-- parameters...  none?
-
-
-
-*/
 
 /* Velocity (linear or angular) on a dynamic body - assumed to be an Ammo body
    of type dynamic.
@@ -911,7 +712,7 @@ AFRAME.registerComponent('db-velocity', {
    - Moving as swiftly as possible to the desired position, subject to the
      impacts and constraints of the physical world.
    - Respecting configured limits on both acceleration and velocity. */
-
+/* Not currently in use.
 AFRAME.registerComponent('db-position', {
 
   schema: {
@@ -964,7 +765,7 @@ AFRAME.registerComponent('db-position', {
     // As position gets to the specified position, velocity should naturally drop
     // to zero.
   }
-});
+}); */
 
 
   /* Set rotation on a dynamic body - assumed to be an Ammo body
