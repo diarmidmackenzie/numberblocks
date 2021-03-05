@@ -16,7 +16,8 @@
 
 </head>
 <body>
-  <a-scene physics="driver: ammo" renderer="colorManagement:true">
+  <a-scene stats physics="driver: ammo" renderer="colorManagement:true">
+    <!-- for physics debug, add "; debug: true; debugDrawMode: 1;"
 
   <a-mixin id="touch"
            ammo-phase-shift
@@ -98,7 +99,7 @@
         src="../assets/limbs/limb.glb"
         response-type="arraybuffer" crossorigin="anonymous"></a-asset-item>
 
-    <a-mixin id="cube" geometry="primitive: box; width: 0.3; height: 0.3; depth: 0.3"
+  <a-mixin id="cube" geometry="primitive: box; width: 0.3; height: 0.3; depth: 0.3"
              grabbable="constraintComponentName: ammo-constraint;"
              ammo-body="type: dynamic" ammo-shape="type: box"
              shadow></a-mixin>
@@ -106,6 +107,9 @@
             grabbable="constraintComponentName: ammo-constraint;"
             ammo-body="type: dynamic" ammo-shape="type: box"
             shadow></a-mixin>
+   <a-mixin id = "block1"
+            material = "color:#dd1111"
+            geometry="primitive: box; width: 0.1; height: 0.1; depth: 0.1"></a-mixin>
 
 <!-- large play table-->
 <a-entity position = "0 0 -1">
@@ -164,7 +168,14 @@
   <a-plane id="number" position = "0.1 0.8001 0.35" height = "0.2" width = "0.2" rotation = "-90 0 0" material = "color:black">
     <a-text value = "1" width="4" wrapCount = "1" position = "-0.05 0.0001 0" rotation = "0 0 0" color="white">
     </a-text>
-  </a-box>
+  </a-plane>
+
+
+  <a-text value = "OUT OF ORDER" width="3" wrapCount = "20" position = "-0.5 0.8001 0" rotation = "-90 0 0" color="white" side = "double">
+  </a-text>
+
+
+
 </a-entity>
 
 
@@ -234,46 +245,30 @@
 <a-entity id= "plank-left" class="plank" mixin="plank" position="0.8 1 -0.75" rotation= "0 0 20" material="color: brown"></a-entity>
 
 
+<a-entity id = "one-1" position = "0.8 2 -1"
+rotation = "0 0 0"
+numberblock>
+</a-entity>
 
+<a-entity id = "one-2" position = "0.4 2 -1"
+rotation = "0 0 0"
+numberblock>
+</a-entity>
 
-<a-entity id = "oneEntity"
-          ammo-body="type: dynamic"
-          ammo-shape="type: box; fit:manual;halfExtents:0.05 0.0825 0.05"
-          position = "0 1.01575 -1"
-          rotation = "0 0 0"
-          numberblock
-          grabbable="constraintComponentName: ammo-constraint">
-  <a-entity id = "oneBody">
-  <a-box id = "oneBox" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" position="0 0.0375 0">
+<a-entity id = "one-3" position = "0 2 -1"
+rotation = "0 0 0"
+numberblock>
+</a-entity>
 
-    <a-entity gltf-model="#face1"
-              scale="0.05 0.05 0.05"
-              position="0 0 0.05">
-    </a-entity>
-  </a-box>
+<a-entity id = "one-4" position = "-0.4 2 -1"
+rotation = "0 0 0"
+numberblock>
+</a-entity>
 
-  <a-entity id = "oneLArm" gltf-model="#limb1"
-            scale="0.05 0.05 0.05"
-            position="0.05 0.0375 0"
-            rotation="0 0 30">
-  </a-entity>
-  <a-entity id = "oneRArm" gltf-model="#limb1"
-            scale="0.05 0.05 0.05"
-            position="-0.05 0.0375 0"
-            rotation="0 0 -30">
-  </a-entity>
-  </a-entity>
-  <a-entity id = "oneLLeg" gltf-model="#limb1"
-            scale="0.05 0.05 0.05"
-            position="0.02 -0.0075 0"
-            rotation="0 0 0">
-  </a-entity>
-  <a-entity id = "oneRLeg" gltf-model="#limb1"
-            scale="0.05 0.05 0.05"
-            position="-0.02 -0.0075 0"
-            rotation="0 0 0">
-  </a-entity>
-
+<a-entity id = "one-5" position = "-0.8 2 -1"
+rotation = "0 0 0"
+numberblock>
+</a-entity>
 
 </a-entity>
 

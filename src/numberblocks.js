@@ -232,13 +232,8 @@ AFRAME.registerComponent('numberblock', {
      'grounded' : true
     }
 
-    this.lLeg = document.querySelector("#oneLLeg");
-    this.rLeg = document.querySelector("#oneRLeg");
-    this.lArm = document.querySelector("#oneLArm");
-    this.rArm = document.querySelector("#oneRArm");
-    this.whole = document.querySelector("#oneEntity");
-    this.body = document.querySelector("#oneBody");
-    this.box = document.querySelector("#oneBox");
+    this.createBodyParts();
+    this.whole = this.el;  // do we need this?  suspect not...
 
     this.transitions = [];
 
@@ -269,7 +264,94 @@ AFRAME.registerComponent('numberblock', {
     this.el.addEventListener('grab-start', this.listeners.grabStart);
     this.el.addEventListener('grab-end', this.listeners.grabEnd);
 
-    this.createAnimations();
+    // commenting out while trying async after object creation.
+    // That doesn't seem to have made a difference, though...
+    //this.createAnimations();
+  },
+
+  createBodyParts: function() {
+
+    // Set attributes on main entity.
+    // Position, rotation assumed to be set externally.
+    this.el.setAttribute("ammo-body", 'type', 'dynamic')
+    this.el.setAttribute("ammo-shape", {'type': 'box',
+                                        'fit': 'manual',
+                                        'halfExtents': {'x': 0.05,
+                                                        'y': 0.0825,
+                                                        'z': 0.05}});
+    this.el.setAttribute("grabbable", 'constraintComponentName', 'ammo-constraint');
+
+    const id = this.el.id;
+    this.animatedPartsToLoad = 6;
+
+    // Create the body.  This includes the blocks & arms, but not the legs.
+    // Just a container, with minimal of its own attributes.
+    this.body = document.createElement('a-entity');
+    this.body.setAttribute('id', id + "-body");
+    this.body.setAttribute('body-part-loaded', `part: body; entity: #${id}`);
+    this.el.appendChild(this.body);
+
+    // Create the box.  This includes the blocks as children.
+    this.box = document.createElement('a-entity');
+    this.box.setAttribute('id', id + "-box");
+    this.box.object3D.position.set(0, 0.0375, 0);
+    this.box.setAttribute('body-part-loaded', `part: box; entity: #${id}`);
+    this.body.appendChild(this.box);
+
+    // Create the blocks.  This includes the blocks as children.
+    // Just one block for now - will need to extend for larger numbers.
+    this.blocks = [];
+    var block =  document.createElement('a-entity');
+    block.setAttribute('id', id + "-block1");
+    block.setAttribute('mixin', 'block1');
+    block.object3D.position.set(0, 0, 0);
+    this.box.appendChild(block);
+    this.blocks.push(block);
+
+    // The face is a child of the box, so it can cover multiple blocks.
+    this.face = document.createElement('a-entity');
+    this.face.setAttribute('id', id + "-face");
+    this.face.setAttribute('gltf-model', '#face1');
+    this.face.object3D.scale.set(0.05, 0.05, 0.05);
+    this.face.object3D.position.set(0, 0, 0.05);
+    this.box.appendChild(this.face);
+
+    // The arms are children of the body (but not the box).
+    this.lArm = document.createElement('a-entity');
+    this.lArm.setAttribute('id', id + "-lArm");
+    this.lArm.setAttribute('gltf-model', '#limb1');
+    this.lArm.object3D.scale.set(0.05, 0.05, 0.05);
+    this.lArm.object3D.position.set(0.05, 0.0375, 0);
+    this.lArm.object3D.rotation.set(0, 0, THREE.Math.degToRad(30));
+    this.lArm.setAttribute('body-part-loaded', `part: lArm; entity: #${id}`);
+    this.body.appendChild(this.lArm);
+
+    this.rArm = document.createElement('a-entity');
+    this.rArm.setAttribute('id', id + "-rArm");
+    this.rArm.setAttribute('gltf-model', '#limb1');
+    this.rArm.object3D.scale.set(0.05, 0.05, 0.05);
+    this.rArm.object3D.position.set(-0.05, 0.0375, 0);
+    this.rArm.object3D.rotation.set(0, 0, THREE.Math.degToRad(-30));
+    this.rArm.setAttribute('body-part-loaded', `part: rArm; entity: #${id}`);
+    this.body.appendChild(this.rArm);
+
+    // The legs are children of the entity (but not the box or body).
+    this.lLeg = document.createElement('a-entity');
+    this.lLeg.setAttribute('id', id + "-lLeg");
+    this.lLeg.setAttribute('gltf-model', '#limb1');
+    this.lLeg.object3D.scale.set(0.05, 0.05, 0.05);
+    this.lLeg.object3D.position.set(0.02, 0.0075, 0);
+    this.lLeg.setAttribute('body-part-loaded', `part: lLeg; entity: #${id}`);
+    this.el.appendChild(this.lLeg);
+
+    this.rLeg = document.createElement('a-entity');
+    this.rLeg.setAttribute('id', id + "-rLeg");
+    this.rLeg.setAttribute('gltf-model', '#limb1');
+    this.rLeg.object3D.scale.set(0.05, 0.05, 0.05);
+    this.rLeg.object3D.position.set(-0.02, 0.0075, 0);
+    this.rLeg.setAttribute('body-part-loaded', `part: rLeg; entity: #${id}`);
+    this.el.appendChild(this.rLeg);
+
   },
 
   update: function() {
@@ -287,25 +369,23 @@ AFRAME.registerComponent('numberblock', {
 
   /* ANIMATION FUNCTIONALITY */
 
-  // We create all animations on the object at start of day, and then trigger
+  // We create all animations on the object at soon as it is loaded, and then trigger
   // them using events.
-  createAnimations: function() {
+  createBodyPartAnimations: function(part) {
 
     ACTIONS.forEach((action) => {
       PROPERTIES.forEach((property) => {
         if (ANIMATIONS[action][property]) {
-          PARTS.forEach((part) => {
-            if (ANIMATIONS[action][property][part]) {
-              ANIMATIONS[action][property][part].forEach((keyFrame, index) => {
-                this.addKeyFrameAnimation(part, action, property, index);
-              });
-            }
-          });
+          if (ANIMATIONS[action][property][part]) {
+            ANIMATIONS[action][property][part].forEach((keyFrame, index) => {
+              this.addKeyFrameAnimation(part, action, property, index);
+            });
+          }
         }
       });
     });
   },
-
+  
   addKeyFrameAnimation: function(part, action, property, index) {
 
     const target = this[part];
@@ -394,7 +474,10 @@ AFRAME.registerComponent('numberblock', {
 
     this.syncStateFromPosition();
 
-    if (((time % 5000) < ((time - timeDelta) % 5000)) &&
+    // Use a random gap between actions, or you get creepy synchronization
+    // between different numberblock instances.
+    const thisGap = Math.random() * 7000;
+    if (((time % thisGap) < ((time - timeDelta) % thisGap)) &&
         (!this.state.grabbed))
      {
       // every 5 seconds.
@@ -542,7 +625,7 @@ AFRAME.registerComponent('numberblock', {
      Modified to allow for the body not being vertical */
   isSupportedBelow: function(myHeight, sensitivity) {
 
-    if (!Ammo.asm.$) {
+    if (!this.ammo || !Ammo.asm.$) {
       // physics engine not activated yet.
       return true;
     }
@@ -921,4 +1004,17 @@ AFRAME.registerComponent('rotate-to-face-player', {
 
     }
   })()
+});
+
+/* Loading animations onto entities before they are loaded seems to have problems
+   So we delay this process, and load the animations once the entity is loaded */
+AFRAME.registerComponent('body-part-loaded', {
+  schema: {
+    part: {type: 'string'},
+    entity: {type: 'selector'}
+  },
+  init: function () {
+    // This will be called after the entity has properly attached and loaded.
+    this.data.entity.components['numberblock'].createBodyPartAnimations(this.data.part);
+  }
 });
