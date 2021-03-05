@@ -107,66 +107,111 @@
             ammo-body="type: dynamic" ammo-shape="type: box"
             shadow></a-mixin>
 
-<a-box id = "bench" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "2" depth = "1.5" position = "0 0.75 -1" ammo-body="type: static">
-</a-box>
-<a-box id = "leg1" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "-0.9 0.35 -0.35" ammo-body="type: static">
-</a-box>
-<a-box id = "leg2" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "0.9 0.35 -0.35" ammo-body="type: static">
-</a-box>
-<a-box id = "leg3" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "0.9 0.35 -1.65" ammo-body="type: static">
-</a-box>
-<a-box id = "leg4" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "-0.9 0.35 -1.65" ammo-body="type: static">
-</a-box>
+<!-- large play table-->
+<a-entity position = "0 0 -1">
+  <a-box id = "bench" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "2" depth = "1.5" position = "0 0.75 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "leg1" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "-0.9 0.35 0.65" ammo-body="type: static">
+  </a-box>
+  <a-box id = "leg2" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "0.9 0.35 0.65" ammo-body="type: static">
+  </a-box>
+  <a-box id = "leg3" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "0.9 0.35 -0.65" ammo-body="type: static">
+  </a-box>
+  <a-box id = "leg4" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "-0.9 0.35 -0.65" ammo-body="type: static">
+  </a-box>
+  <a-box id = "buffer1" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.15" width = "0.01" depth = "1.5" position = "-1 0.875 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "buffer2" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.15" width = "0.01" depth = "1.5" position = "1 0.875 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "buffer3" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.15" width = "2" depth = "0.01" position = "0 0.875 -0.75" ammo-body="type: static">
+  </a-box>
+</a-entity>
 
-<a-box id = "buffer1" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.15" width = "0.01" depth = "1.5" position = "-1 0.875 -1" ammo-body="type: static">
-</a-box>
-<a-box id = "buffer2" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.15" width = "0.01" depth = "1.5" position = "1 0.875 -1" ammo-body="type: static">
-</a-box>
-<a-box id = "buffer3" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.15" width = "2" depth = "0.01" position = "0 0.875 -1.75" ammo-body="type: static">
-</a-box>
+<!-- second table to left - this is where the numberblocks drop-->
+<a-entity position = "-2 0 1" rotation = "0 90 0">
+  <a-box id = "bench" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "1" depth = "1" position = "0 0.75 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "leg1" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "-0.4 0.35 0.4" ammo-body="type: static">
+  </a-box>
+  <a-box id = "leg2" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "0.4 0.35 0.4" ammo-body="type: static">
+  </a-box>
+  <a-box id = "leg3" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "0.4 0.35 -0.4" ammo-body="type: static">
+  </a-box>
+  <a-box id = "leg4" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "-0.4 0.35 -0.4" ammo-body="type: static">
+  </a-box>
+  <a-box id = "buffer1" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.15" width = "0.01" depth = "1" position = "-0.5 0.875 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "buffer2" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.15" width = "0.01" depth = "1" position = "0.5 0.875 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "buffer3" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.15" width = "1" depth = "0.01" position = "0 0.875 -0.5" ammo-body="type: static">
+  </a-box>
+
+  <a-entity id="nb-spawner" position = "0 2 0" numberblock-spawner>
+  </a-entity>
+
+  <a-box id="spawn-button" position = "0.35 0.8 0.35" height = "0.1" width = "0.2" depth = "0.2" material = "color:green">
+    <a-text value = "SPAWN" width="1" wrapCount = "5" position = "-0.08 0.0501 0" rotation = "-90 0 0" color="white">
+    </a-text>
+  </a-box>
+  <a-box id="minus-button" position = "-0.35 0.8 0.35" height = "0.1" width = "0.2" depth = "0.2" material = "color:blue">
+    <a-text value = "-" width="4" wrapCount = "1" position = "-0.05 0.0501 0" rotation = "-90 0 0" color="white">
+    </a-text>
+  </a-box>
+  <a-box id="plus-button" position = "-0.15 0.8 0.35" height = "0.1" width = "0.2" depth = "0.2" material = "color:blue">
+    <a-text value = "+" width="4" wrapCount = "1" position = "-0.05 0.0501 0" rotation = "-90 0 0" color="white">
+    </a-text>
+  </a-box>
+  <a-plane id="number" position = "0.1 0.8001 0.35" height = "0.2" width = "0.2" rotation = "-90 0 0" material = "color:black">
+    <a-text value = "1" width="4" wrapCount = "1" position = "-0.05 0.0001 0" rotation = "0 0 0" color="white">
+    </a-text>
+  </a-box>
+</a-entity>
 
 
-<a-box id = "slide-core" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "1.4" width = "0.4" depth = "0.4" position = "2 0.7 1" ammo-body="type: static">
-</a-box>
-<a-entity id = "slide1" position = "2.1 1.25 1.3" rotation = "0 0 20">
-  <a-box id = "slide1-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+<!-- The slide!-->
+<a-entity "slide" position = "2 0 1">
+  <a-box id = "slide-core" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "1.4" width = "0.4" depth = "0.4" position = "0 0.7 0"  ammo-body="type: static">
   </a-box>
-  <a-box id = "slide1-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-  <a-box id = "slide1-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-</a-entity>
-<a-entity id = "slide2" position = "1.7 1 1.1" rotation = "0 -90 20">
-  <a-box id = "slide2-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-  <a-box id = "slide2-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-  <a-box id = "slide2-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-</a-entity>
-<a-entity id = "slide3" position = "1.9 0.75 0.7" rotation = "0 180 20">
-  <a-box id = "slide3-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-  <a-box id = "slide3-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-  <a-box id = "slide3-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-</a-entity>
-<a-entity id = "slide4" position = "2.3 0.5 0.9" rotation = "0 90 20">
-  <a-box id = "slide4-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-  <a-box id = "slide4-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-  <a-box id = "slide4-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-</a-entity>
-<a-entity id = "slide1" position = "2.1 0.25 1.3" rotation = "0 0 20">
-  <a-box id = "slide1-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-  <a-box id = "slide5-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
-  <a-box id = "slide5-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
-  </a-box>
+  <a-entity id = "slide1" position = "0.1 1.25 0.3" rotation = "0 0 20">
+    <a-box id = "slide1-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide1-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide1-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+  </a-entity>
+  <a-entity id = "slide2" position = "-0.3 1 0.1" rotation = "0 -90 20">
+    <a-box id = "slide2-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide2-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide2-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+  </a-entity>
+  <a-entity id = "slide3" position = "-0.1 0.75 -0.3" rotation = "0 180 20">
+    <a-box id = "slide3-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide3-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide3-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+  </a-entity>
+  <a-entity id = "slide4" position = "0.3 0.5 -0.1" rotation = "0 90 20">
+    <a-box id = "slide4-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide4-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide4-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+  </a-entity>
+  <a-entity id = "slide1" position = "0.1 0.25 0.3" rotation = "0 0 20">
+    <a-box id = "slide1-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide5-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+    <a-box id = "slide5-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+    </a-box>
+  </a-entity>
 </a-entity>
 
 
