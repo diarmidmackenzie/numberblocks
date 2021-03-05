@@ -53,6 +53,9 @@
     <a-entity id="lhand" mixin="touch"
               hand-controls="hand: left"
               keyboard-hand-controls="logger:#log-panel1"
+              teleport-controls="cameraRig: #rig;
+                                 teleportOrigin: #camera;
+                                 button: trigger"
               key-bindings="bindings:ShiftLeft=enable,ShiftRight=disable"
               position="-0.3 1.1 -1">
     </a-entity>
@@ -74,6 +77,9 @@
                 position = "-0.2 1 -1"
                 visible="true"
                 mixin="touch"
+                teleport-controls="cameraRig: #rig;
+                                   teleportOrigin: #camera;
+                                   button: trigger"
                 hand-controls="hand: left">
       </a-entity>
       <a-entity id="rhand"
@@ -101,8 +107,6 @@
             ammo-body="type: dynamic" ammo-shape="type: box"
             shadow></a-mixin>
 
-
-
 <a-box id = "bench" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "2" depth = "1.5" position = "0 0.75 -1" ammo-body="type: static">
 </a-box>
 <a-box id = "leg1" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.7" width = "0.1" depth = "0.1" position = "-0.9 0.35 -0.35" ammo-body="type: static">
@@ -122,6 +126,52 @@
 </a-box>
 
 
+<a-box id = "slide-core" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "1.4" width = "0.4" depth = "0.4" position = "2 0.7 1" ammo-body="type: static">
+</a-box>
+<a-entity id = "slide1" position = "2.1 1.25 1.3" rotation = "0 0 20">
+  <a-box id = "slide1-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide1-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide1-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+</a-entity>
+<a-entity id = "slide2" position = "1.7 1 1.1" rotation = "0 -90 20">
+  <a-box id = "slide2-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide2-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide2-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+</a-entity>
+<a-entity id = "slide3" position = "1.9 0.75 0.7" rotation = "0 180 20">
+  <a-box id = "slide3-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide3-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide3-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+</a-entity>
+<a-entity id = "slide4" position = "2.3 0.5 0.9" rotation = "0 90 20">
+  <a-box id = "slide4-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide4-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide4-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+</a-entity>
+<a-entity id = "slide1" position = "2.1 0.25 1.3" rotation = "0 0 20">
+  <a-box id = "slide1-base" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.01" width = "0.7" depth = "0.2" position = "0 0 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide5-side" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.7" depth = "0.01" position = "0 0.05 0.1" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+  <a-box id = "slide5-end" ammo-body="type: static" ammo-shape="type: box" material = "color:#774411" height = "0.1" width = "0.01" depth = "0.2" position = "0.35 0.05 0" rotation = "0 0 0" ammo-body="type: static">
+  </a-box>
+</a-entity>
+
+
+
+
 <!--<a-entity id = "test" ammo-body="type: dynamic" ammo-shape="type: box; fit:manual;halfExtents:0.05 0.05 0.05" material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1" position = "0 3 -1">
   <a-box material = "color:#dd1111" height = "0.1" width = "0.1" depth = "0.1">
   </a-box>
@@ -137,6 +187,8 @@
 <a-entity id= "plank-rear" class="plank" mixin="plank" position="0 1 -1.5" rotation= "0 90 20" material="color: brown"></a-entity>
 <a-entity id= "plank-left" class="plank" mixin="plank" position="-0.8 1 -0.75" rotation= "0 0 -20" material="color: brown"></a-entity>
 <a-entity id= "plank-left" class="plank" mixin="plank" position="0.8 1 -0.75" rotation= "0 0 20" material="color: brown"></a-entity>
+
+
 
 
 <a-entity id = "oneEntity"
