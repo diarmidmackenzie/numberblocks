@@ -656,7 +656,7 @@ AFRAME.registerComponent('numberblock', {
 
   startPartPropertyAnimation: function(part, action, property, index) {
 
-    this[part].emit(`start-anim-${action}_${part}_${property}_${index}`, false);
+    this[part].emit(`start-anim-${action}_${part}_${property}_${index}`, null, false);
   },
 
   animationComplete: function(event) {
